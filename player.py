@@ -1,7 +1,7 @@
 import pygame
 
 class Player:
-    def __init__(self, game):
+    def __init__(self, game, camera):
         self.game = game
         self.camera = camera
         self.perso_scale = 15

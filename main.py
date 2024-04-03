@@ -22,6 +22,7 @@ class Game:
         self.clock = pygame.time.Clock()
 
         self.player = Player(self)
+        self.camera = Camera(self)
 
         self.x = 0
         self.y = self.screen.get_height() - self.player.perso.get_height()

@@ -2,7 +2,7 @@ import pygame
 
 class Camera:
 
-    def __init__(self, game):
+    def __init__(self, game, player):
         self.game = game
         self.player = player
         self.CameraX = 0
