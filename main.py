@@ -8,6 +8,15 @@ class Game:
         self.screen_width = 1920
         self.screen_height = 1080
 
+        self.background = pygame.image.load("img/backgroundEndless-JV.png")
+        self.background = pygame.transform.scale(self.background, (self.screen_width * 1.5, self.screen_height))
+        self.rect = self.background.get_rect()
+        self.rect.x = 0
+        self.rect.y = self.screen_height - (self.screen_height)
+
+        self.CameraX = self.rect.x
+        self.CameraY = self.rect.y
+
         pygame.init()
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
         self.clock = pygame.time.Clock()
@@ -16,25 +25,24 @@ class Game:
 
         self.x = 0
         self.y = self.screen.get_height() - self.player.perso.get_height()
-        self.is_jumping = False
-        self.base_jump = self.player.perso_scale
-        self.scale_factor = self.screen_width / 1920
-        self.jump_scale = self.player.perso_scale + ((1 * self.scale_factor)/2)
-        self.jump_count = 10
+
         self.orientation = "Right"
         self.running = True
 
-        area1_width = self.screen_width/7
-        area1_height = self.screen_height/3
-        area2_width = self.screen_width / 3
-        area2_height = self.screen_height / 10
+        self.area1_width = self.screen_width/7
+        self.area1_height = self.screen_height/3
+        self.area2_width = self.screen_width / 3
+        self.area2_height = self.screen_height / 10
 
-        self.area1 = pygame.Rect((self.screen_width - area1_width) / 2, self.screen_height - area1_height, area1_width, area1_height)
+        self.area1 = pygame.Rect(((self.screen_width - self.area1_width) /2) , self.screen_height - self.area1_height, self.area1_width, self.area1_height)
         self.area1_color = (255, 0, 0)
-        self.area2 = pygame.Rect(self.screen_width - area2_width, (self.screen_height - area2_height) / 2, area2_width, area2_height)
+        self.area2 = pygame.Rect((self.screen_width - self.area2_width) , (self.screen_height - self.area2_height) / 2, self.area2_width, self.area2_height)
         self.area2_color = (255, 0, 255)
 
         pygame.display.set_caption("Affichage de texte")
+
+
+
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -46,7 +54,8 @@ class Game:
             self.running = False
 
     def update(self, pressed):
-        self.player.move_character(pressed, self.is_jumping)
+        self.player.move_character(pressed, self.player.is_jumping)
+        self.move_background(pressed)
         if self.area1.colliderect(self.player.rect):
             self.area1_color = (0, 255, 0)
         else:
@@ -59,6 +68,7 @@ class Game:
 
     def display(self):
         self.screen.fill((152, 140, 122))
+        self.screen.blit(self.background, (self.rect))
         pygame.draw.rect(self.screen, self.area1_color, self.area1)
         pygame.draw.rect(self.screen, self.area2_color, self.area2)
         if self.area1_color == (0, 255, 0):
@@ -66,7 +76,7 @@ class Game:
         if self.area2_color == (0, 0, 255):
             self.text("Collider activé", 40, "white", "mid_right")
         self.player.draw_character()
-        self.text("Bienvenue sur cette Alpha du jeu ! :p", 65, "white", "top_center")
+        self.text(f"Bienvenue sur cette Alpha du jeu {self.CameraX} ! :p", 65, "black", "top_center")
 
         pygame.display.flip()
 

@@ -5,14 +5,18 @@ class Player:
         self.game = game
         self.camera = camera
         self.perso_scale = 15
-        self.perso = pygame.image.load("perso JV.png")
-        self.perso = pygame.transform.scale(self.perso, (
-        self.game.screen_width // self.perso_scale, self.game.screen_height // (self.perso_scale // 2)))
+        self.perso = pygame.image.load("img/perso JV.png")
+        self.perso = pygame.transform.scale(self.perso, (self.game.screen_width // self.perso_scale, self.game.screen_height // (self.perso_scale // 2)))
         self.rect = self.perso.get_rect()
         self.rect.x = 0
         self.rect.y = self.game.screen.get_height() - self.perso.get_height()
         self.speed = 8
         self.velocity = [0, 0]
+
+        self.is_jumping = False
+        self.scale_factor = self.game.screen_width / 1920
+        self.jump_scale = self.perso_scale + ((1 * self.scale_factor) / 2)
+        self.jump_count = self.perso_scale
 
     def move_character(self, pressed, is_jumping):
         if pressed[pygame.K_LEFT] or pressed[pygame.K_q]:
@@ -34,14 +38,14 @@ class Player:
 
         if not is_jumping:
             if pressed[pygame.K_SPACE] or pressed[pygame.K_UP]:
-                self.game.is_jumping = True
-                self.game.jump_count = self.game.jump_scale
+                self.is_jumping = True
         else:
-            if self.game.jump_count >= -self.game.jump_scale:
-                self.rect.y -= self.game.jump_count * abs(self.game.jump_count) * 0.4
-                self.game.jump_count -= 1
+            if self.jump_count >= -self.jump_scale:
+                self.rect.y -= self.jump_count * abs(self.jump_count) * 0.4
+                self.jump_count -= 1
             else:
-                self.game.is_jumping = False
+                self.jump_count = self.jump_scale
+                self.is_jumping = False
                 self.rect.y = self.game.screen.get_height() - self.perso.get_height()
 
 
