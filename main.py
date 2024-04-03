@@ -1,5 +1,6 @@
 import pygame
 from player import Player
+from camera import Camera
 
 
 class Game:

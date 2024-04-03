@@ -3,6 +3,7 @@ import pygame
 class Player:
     def __init__(self, game):
         self.game = game
+        self.camera = camera
         self.perso_scale = 15
         self.perso = pygame.image.load("perso JV.png")
         self.perso = pygame.transform.scale(self.perso, (
