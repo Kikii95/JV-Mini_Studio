@@ -6,7 +6,6 @@ class Game:
     def __init__(self):
         self.screen_width = 1920
         self.screen_height = 1080
-        self.perso_scale = 15
 
         pygame.init()
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
@@ -18,15 +17,20 @@ class Game:
         self.y = self.screen.get_height() - self.player.perso.get_height()
         self.is_jumping = False
         self.base_jump = self.player.perso_scale
-        self.scale_factor = 20
-        self.jump_scale = self.base_jump * (self.scale_factor / (self.player.perso_scale * 1.5))
-        self.jump_count = self.jump_scale
+        self.scale_factor = self.screen_width / 1920
+        self.jump_scale = self.player.perso_scale + ((1 * self.scale_factor)/2)
+        self.jump_count = 10
         self.orientation = "Right"
         self.running = True
 
-        self.area1 = pygame.Rect((self.screen_width - 250) / 2, self.screen_height - 350, 250, 350)
+        area1_width = self.screen_width/7
+        area1_height = self.screen_height/3
+        area2_width = self.screen_width / 3
+        area2_height = self.screen_height / 10
+
+        self.area1 = pygame.Rect((self.screen_width - area1_width) / 2, self.screen_height - area1_height, area1_width, area1_height)
         self.area1_color = (255, 0, 0)
-        self.area2 = pygame.Rect(self.screen_width - 500, (self.screen_height - 100) / 2, 500, 100)
+        self.area2 = pygame.Rect(self.screen_width - area2_width, (self.screen_height - area2_height) / 2, area2_width, area2_height)
         self.area2_color = (255, 0, 255)
 
         pygame.display.set_caption("Affichage de texte")
@@ -66,7 +70,8 @@ class Game:
         pygame.display.flip()
 
 
-    def text(self, text, font_size, font_color, position):
+    def text(self, text, text_size, font_color, position):
+        font_size = int(float((text_size * self.screen_width) / 1920))
         font = pygame.font.Font(None, font_size)
         margin = font_size
 

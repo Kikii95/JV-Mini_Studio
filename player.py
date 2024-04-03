@@ -34,14 +34,15 @@ class Player:
         if not is_jumping:
             if pressed[pygame.K_SPACE] or pressed[pygame.K_UP]:
                 self.game.is_jumping = True
+                self.game.jump_count = self.game.jump_scale
         else:
             if self.game.jump_count >= -self.game.jump_scale:
-                self.rect.y -= self.game.jump_count * abs(self.game.jump_count) * 0.5
+                self.rect.y -= self.game.jump_count * abs(self.game.jump_count) * 0.4
                 self.game.jump_count -= 1
             else:
-                self.game.jump_count = self.game.jump_scale
                 self.game.is_jumping = False
                 self.rect.y = self.game.screen.get_height() - self.perso.get_height()
+
 
     def draw_character(self):
         if self.game.orientation == "Right":
