@@ -1,14 +1,20 @@
 import pygame
+import button
+import csv
+import pickle
 from pygame.locals import *
 
 pygame.init()
 
-screen_width = 800
-screen_height = 640
-lower_margin = 100
-side_margin = 300
+clock = pygame.time.Clock()
+FPS = 60
 
-screen = pygame.display.set_mode((screen_width + side_margin, screen_height + lower_margin))
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 640
+LOWER_MARGIN = 100
+SIDE_MARGIN = 300
+
+screen = pygame.display.set_mode((SCREEN_WIDTH + SIDE_MARGIN, SCREEN_HEIGHT + LOWER_MARGIN))
 pygame.display.set_caption('Level Editor')
 
 ROWS = 16
@@ -22,8 +28,25 @@ scroll_right = False
 scroll = 0
 scroll_speed = 1
 
-pine1_img = pygame.image.load('img/fond.webp').convert_alpha()
+pine1_img = pygame.image.load('img/Background/pine1.png').convert_alpha()
+pine2_img = pygame.image.load('img/Background/pine2.png').convert_alpha()
+mountain_img = pygame.image.load('img/Background/mountain.png').convert_alpha()
+sky_img = pygame.image.load('img/Background/sky_cloud.png').convert_alpha()
+img_list = []
+for x in range(TILE_TYPES):
+	img = pygame.image.load(f'img/tile/{x}.png')
+	img = pygame.transform.scale(img, (TILE_SIZE, TILE_SIZE))
+	img_list.append(img)
 
+	save_img = pygame.image.load('img/save_btn.png').convert_alpha()
+	load_img = pygame.image.load('img/load_btn.png').convert_alpha()
+
+GREEN = (144, 201, 120)
+WHITE = (255, 255, 255)
+RED = (200, 25, 25)
+
+#define font
+font = pygame.font.SysFont('Futura', 30)
 
 
 world_data = []
@@ -45,7 +68,7 @@ def draw_text(text, font, text_col, x, y):
 #create function for drawing background
 def draw_bg():
 	screen.fill(GREEN)
-	width = pine1_img_img.get_width()
+	width = pine1_img.get_width()
 	for x in range(4):
             screen.blit(pine1_img, (-scroll,0))
 
