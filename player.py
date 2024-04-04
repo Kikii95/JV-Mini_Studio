@@ -1,13 +1,13 @@
 import pygame
 
 class Player:
-    def __init__(self, game, camera):
+    def __init__(self, game):
         self.game = game
-        self.camera = camera
         self.perso_scale = 15
         self.perso = pygame.image.load("img/perso JV.png")
         self.perso = pygame.transform.scale(self.perso, (self.game.screen_width // self.perso_scale, self.game.screen_height // (self.perso_scale // 2)))
         self.rect = self.perso.get_rect()
+        self.perso_width = self.rect.width
         self.rect.x = 0
         self.rect.y = self.game.screen.get_height() - self.perso.get_height()
         self.speed = 8

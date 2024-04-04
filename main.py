@@ -2,20 +2,26 @@ import pygame
 from player import Player
 from camera import Camera
 
-
 class Game:
     def __init__(self):
         self.screen_width = 1920
         self.screen_height = 1080
 
         self.background = pygame.image.load("img/backgroundEndless-JV.png")
-        self.background = pygame.transform.scale(self.background, (self.screen_width * 1.5, self.screen_height))
-        self.rect = self.background.get_rect()
-        self.rect.x = 0
-        self.rect.y = self.screen_height - (self.screen_height)
+        self.background = pygame.transform.scale(self.background, ( self.screen_width, self.screen_height))  # Double la largeur pour créer l'effet endless
+        self.rect1 = self.background.get_rect()
+        self.rect2 = self.background.get_rect()
+        self.rect1.x = 0 - (self.screen_width * 1 / 9)
+        self.rect2.x = self.screen_width
+        self.rect1.y = self.screen_height - (self.screen_height)
+        self.rect2.y = self.screen_height - (self.screen_height)
 
-        self.CameraX = self.rect.x
-        self.CameraY = self.rect.y
+
+
+        self.Camera1X = self.rect1.x
+        self.Camera1Y = self.rect1.y
+        self.Camera2X = self.rect2.x
+        self.Camera2Y = self.rect2.y
 
         pygame.init()
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
@@ -23,6 +29,7 @@ class Game:
 
         self.player = Player(self)
         self.camera = Camera(self)
+
 
         self.x = 0
         self.y = self.screen.get_height() - self.player.perso.get_height()
@@ -44,7 +51,6 @@ class Game:
 
 
 
-
     def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -54,9 +60,20 @@ class Game:
         if pressed[pygame.K_ESCAPE]:
             self.running = False
 
+    def update_background(self):
+        if self.rect1.right <= 0:
+            self.rect1.x = self.rect2.right
+        elif self.rect2.right <= 0:
+            self.rect2.x = self.rect1.right
+
+        if self.rect1.left >= self.screen_width:
+            self.rect1.x = self.rect2.left - self.screen_width
+        elif self.rect2.left >= self.screen_width:
+            self.rect2.x = self.rect1.left - self.screen_width
+
     def update(self, pressed):
         self.player.move_character(pressed, self.player.is_jumping)
-        self.move_background(pressed)
+        self.camera.update()
         if self.area1.colliderect(self.player.rect):
             self.area1_color = (0, 255, 0)
         else:
@@ -69,7 +86,8 @@ class Game:
 
     def display(self):
         self.screen.fill((152, 140, 122))
-        self.screen.blit(self.background, (self.rect))
+        self.screen.blit(self.background, self.rect1)
+        self.screen.blit(self.background, self.rect2)
         pygame.draw.rect(self.screen, self.area1_color, self.area1)
         pygame.draw.rect(self.screen, self.area2_color, self.area2)
         if self.area1_color == (0, 255, 0):
@@ -77,7 +95,7 @@ class Game:
         if self.area2_color == (0, 0, 255):
             self.text("Collider activé", 40, "white", "mid_right")
         self.player.draw_character()
-        self.text(f"Bienvenue sur cette Alpha du jeu {self.CameraX} ! :p", 65, "black", "top_center")
+        self.text("Bienvenue sur cette Alpha du jeu ! :p", 65, "black", "top_center")
 
         pygame.display.flip()
 
@@ -118,11 +136,13 @@ class Game:
 
     def run(self):
         while self.running:
+            self.camera.update()
+            self.update_background()
             self.handle_events()
             pressed = pygame.key.get_pressed()
             self.update(pressed)
             self.display()
-            self.clock.tick(75)
+            self.clock.tick(60)
 
         pygame.quit()
 
