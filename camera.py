@@ -23,3 +23,5 @@ class Camera:
             self.game.rect2.x += delta_x
             self.game.area1.x += delta_x
             self.game.area2.x += delta_x
+
+

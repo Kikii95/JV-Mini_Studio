@@ -37,6 +37,7 @@ class Game:
         self.orientation = "Right"
         self.running = True
 
+
         self.area1_width = self.screen_width/7
         self.area1_height = self.screen_height/3
         self.area2_width = self.screen_width / 3
@@ -71,34 +72,9 @@ class Game:
         elif self.rect2.left >= self.screen_width:
             self.rect2.x = self.rect1.left - self.screen_width
 
-    def update(self, pressed):
-        self.player.move_character(pressed, self.player.is_jumping)
-        self.camera.update()
-        if self.area1.colliderect(self.player.rect):
-            self.area1_color = (0, 255, 0)
-        else:
-            self.area1_color = (255, 0, 0)
-
-        if self.area2.colliderect(self.player.rect):
-            self.area2_color = (0, 0, 255)
-        else:
-            self.area2_color = (200, 0, 200)
-
-    def display(self):
-        self.screen.fill((152, 140, 122))
-        self.screen.blit(self.background, self.rect1)
-        self.screen.blit(self.background, self.rect2)
-        pygame.draw.rect(self.screen, self.area1_color, self.area1)
-        pygame.draw.rect(self.screen, self.area2_color, self.area2)
-        if self.area1_color == (0, 255, 0):
-            self.text("Collider activé", 40, "black", "down_center")
-        if self.area2_color == (0, 0, 255):
-            self.text("Collider activé", 40, "white", "mid_right")
-        self.player.draw_character()
-        self.text("Bienvenue sur cette Alpha du jeu ! :p", 65, "black", "top_center")
-
-        pygame.display.flip()
-
+    def is_visible(self, rect):
+        camera_rect = pygame.Rect(self.camera.CameraX, self.camera.CameraY, self.screen_width, self.screen_height)
+        return camera_rect.colliderect(rect)
 
     def text(self, text, text_size, font_color, position):
         font_size = int(float((text_size * self.screen_width) / 1920))
@@ -133,6 +109,37 @@ class Game:
             text_rect.bottom = self.screen_height - margin
 
         self.screen.blit(text_surface, text_rect)
+
+    def display(self):
+        self.screen.fill((152, 140, 122))
+        self.screen.blit(self.background, self.rect1)
+        self.screen.blit(self.background, self.rect2)
+        if self.is_visible(self.area1):
+            pygame.draw.rect(self.screen, self.area1_color, self.area1)
+        if self.is_visible(self.area2):
+            pygame.draw.rect(self.screen, self.area2_color, self.area2)
+        if self.area1_color == (0, 255, 0):
+            self.text("Collider activé", 40, "black", "down_center")
+        if self.area2_color == (0, 0, 255):
+            self.text("Collider activé", 40, "white", "mid_right")
+        self.player.draw_character()
+        self.text("Bienvenue sur cette Alpha du jeu ! :p", 65, "black", "top_center")
+
+        pygame.display.flip()
+
+    def update(self, pressed):
+        self.player.move_character(pressed, self.player.is_jumping)
+        self.camera.update()
+        if self.area1.colliderect(self.player.rect):
+            self.area1_color = (0, 255, 0)
+        else:
+            self.area1_color = (255, 0, 0)
+
+        if self.area2.colliderect(self.player.rect):
+            self.area2_color = (0, 0, 255)
+        else:
+            self.area2_color = (200, 0, 200)
+
 
     def run(self):
         while self.running:
