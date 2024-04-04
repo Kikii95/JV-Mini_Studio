@@ -8,6 +8,7 @@ class Player:
         self.perso = pygame.transform.scale(self.perso, (self.game.screen_width // self.perso_scale, self.game.screen_height // (self.perso_scale // 2)))
         self.rect = self.perso.get_rect()
         self.perso_width = self.rect.width
+        self.perso_height = self.rect.height
         self.rect.x = 0
         self.rect.y = self.game.screen.get_height() - self.perso.get_height()
         self.speed = 8

@@ -16,8 +16,6 @@ class Game:
         self.rect1.y = self.screen_height - (self.screen_height)
         self.rect2.y = self.screen_height - (self.screen_height)
 
-
-
         self.Camera1X = self.rect1.x
         self.Camera1Y = self.rect1.y
         self.Camera2X = self.rect2.x
@@ -40,14 +38,15 @@ class Game:
 
         self.area1_width = self.screen_width/7
         self.area1_height = self.screen_height/3
-        self.area2_width = self.screen_width / 3
-        self.area2_height = self.screen_height / 10
+        self.area2_width = self.screen_width
+        self.area2_height = 20
+        self.area3_width = self.screen_width
+        self.area3_height = 50
 
         self.area1 = pygame.Rect(((self.screen_width - self.area1_width) /2) , self.screen_height - self.area1_height, self.area1_width, self.area1_height)
         self.area1_color = (255, 0, 0)
-        self.area2 = pygame.Rect((self.screen_width - self.area2_width) , (self.screen_height - self.area2_height) / 2, self.area2_width, self.area2_height)
+        self.area2 = pygame.Rect(0 - self.camera.left_screen_cap , (self.screen_height - self.area2_height), self.area2_width + self.camera.right_screen_cap, self.area2_height)
         self.area2_color = (255, 0, 255)
-
         pygame.display.set_caption("Affichage de texte")
 
 
@@ -118,6 +117,7 @@ class Game:
             pygame.draw.rect(self.screen, self.area1_color, self.area1)
         if self.is_visible(self.area2):
             pygame.draw.rect(self.screen, self.area2_color, self.area2)
+
         if self.area1_color == (0, 255, 0):
             self.text("Collider activé", 40, "black", "down_center")
         if self.area2_color == (0, 0, 255):
@@ -137,6 +137,7 @@ class Game:
 
         if self.area2.colliderect(self.player.rect):
             self.area2_color = (0, 0, 255)
+            self.player.rect.y = self.screen_height - self.player.perso_height
         else:
             self.area2_color = (200, 0, 200)
 
