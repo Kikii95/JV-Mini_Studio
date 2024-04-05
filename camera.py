@@ -4,10 +4,10 @@ class Camera:
         self.CameraX = 0
         self.CameraY = 0
 
-        self.right_screen_cap = self.game.screen_width * 5 / 6
-        self.left_screen_cap = self.game.screen_width * 1 / 9
-        self.top_screen_cap = self.game.screen_height * 4 / 9
-        self.down_screen_cap = self.game.screen_height
+        self.right_screen_cap = self.game.screen_width * (4.7 / 7)
+        self.left_screen_cap = self.game.screen_width * (1.5/6)
+        self.top_screen_cap = self.game.screen_height * (2 / 9)
+        self.down_screen_cap = self.game.screen_height * (6.5 / 9)
 
     def update(self):
         if self.game.player.rect.x > self.right_screen_cap:
@@ -15,31 +15,31 @@ class Camera:
             self.game.player.rect.x = self.right_screen_cap
             self.game.rect1.x -= delta_x
             self.game.rect2.x -= delta_x
-            self.game.area1.x -= delta_x
-
+            for platform in self.game.platforms:
+                platform[0].x -= delta_x
 
         if self.game.player.rect.x < self.left_screen_cap:
             delta_x = self.left_screen_cap - self.game.player.rect.x
             self.game.player.rect.x = self.left_screen_cap
             self.game.rect1.x += delta_x
             self.game.rect2.x += delta_x
-            self.game.area1.x += delta_x
+            for platform in self.game.platforms:
+                platform[0].x += delta_x
 
         if self.game.player.rect.y < self.top_screen_cap:
             delta_y = self.top_screen_cap - self.game.player.rect.y
             self.game.player.rect.y = self.top_screen_cap
             self.game.rect1.y += delta_y
             self.game.rect2.y += delta_y
-            self.game.area1.y += delta_y
-            self.game.area2.y += delta_y
-
+            for platform in self.game.platforms:
+                platform[0].y += delta_y
+            self.game.ground.y += delta_y
 
         if self.game.player.rect.y > self.down_screen_cap:
             delta_y = self.game.player.rect.y - self.down_screen_cap
             self.game.player.rect.y = self.down_screen_cap
             self.game.rect1.y -= delta_y
             self.game.rect2.y -= delta_y
-            self.game.area1.y -= delta_y
-            self.game.area2.y -= delta_y
-
-
+            for platform in self.game.platforms:
+                platform[0].y -= delta_y
+            self.game.ground.y -= delta_y
