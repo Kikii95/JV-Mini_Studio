@@ -47,6 +47,9 @@ def handle_click(pos):
     elif 300 <= x <= 325:
         if 50 <= y <= 85:
             settings['volume'] = max(0, settings['volume'] - 10)
+    elif 410 <= x <= 435:  
+        if 50 <= y <= 85:  
+            settings['volume'] = min(100, settings['volume'] + 10)
         elif 100 <= y <= 135:
             settings['resolution'] = (800, 600) if settings['resolution'] == (1024, 768) else (1024, 768)
         elif 150 <= y <= 185:
