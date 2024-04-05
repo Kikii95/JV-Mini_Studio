@@ -8,7 +8,7 @@ class Game:
         self.screen_height = 1080
 
         self.background_scale = 1.2
-        self.background = pygame.image.load("img/backgroundEndless-JV.png")
+        self.background = pygame.image.load("img/backgroundEndless_JV.png")
         self.background = pygame.transform.scale(self.background, ( self.screen_width * self.background_scale, self.screen_height * self.background_scale))  # Double la largeur pour créer l'effet endless
         self.rect1 = self.background.get_rect()
         self.rect2 = self.background.get_rect()
@@ -142,7 +142,7 @@ class Game:
         pygame.display.flip()
 
     def update(self, pressed):
-        self.player.move_character(pressed, self.player.is_jumping)
+        self.player.move_character(pressed, self.player.is_jumping, self.dt)
         #keys = pygame.key.get_pressed()
         #if keys[pygame.K_LEFT] or keys[pygame.K_RIGHT] or keys[pygame.K_d] or keys[pygame.K_q] or keys[pygame.K_SPACE]:
             #self.camera.update()
@@ -154,12 +154,12 @@ class Game:
                     self.is_on_platform = True
                     self.player.velocity[1] = 0
                     self.player.rect.bottom = platform[0].top
-                if self.player.rect.right > platform[0].left > self.player.rect.left and self.player.rect.bottom > platform[0].top:
+                elif self.player.rect.right > platform[0].left > self.player.rect.left and self.player.rect.bottom > platform[0].top:
                     self.player.rect.right = platform[0].left
                 elif self.player.rect.left < platform[0].right < self.player.rect.right and self.player.rect.bottom > platform[0].top:
                     self.player.rect.left = platform[0].right
-                if self.player.rect.top < platform[0].bottom and self.player.rect.bottom > platform[0].top and self.player.velocity[1] >= 0:
-                    self.player.rect.top = platform[0].bottom
+                #elif self.player.rect.top < platform[0].bottom and self.player.rect.bottom > platform[0].top:
+                    #self.player.rect.top = platform[0].bottom
 
 
             else:
@@ -183,14 +183,22 @@ class Game:
 
 
     def run(self):
+        self.dt = 0
+        FPSTarget = 60
+        dtTarget = 1 / FPSTarget
         while self.running:
+            start = pygame.time.get_ticks()
+
             self.camera.update()
             self.update_background()
             self.handle_events()
             pressed = pygame.key.get_pressed()
             self.update(pressed)
             self.display()
-            self.clock.tick(60)
+            self.dt = (pygame.time.get_ticks() - start) / 1000
+            if self.dt < dtTarget:
+                pygame.time.wait(int(1000 * (dtTarget - self.dt)))
+                self.dt = dtTarget
 
         pygame.quit()
 

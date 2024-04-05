@@ -13,7 +13,7 @@ class Player:
         self.rect.y = self.game.screen.get_height() - self.perso_height
         #feet_offset = self.perso_width * 3 / 4  # Décalage pour aligner le milieu de la largeur avec les pieds
         #self.rect.x += feet_offset
-        self.speed = 10
+        self.speed = 1000
         self.velocity = [0, 0]
 
         self.is_jumping = False
@@ -21,7 +21,7 @@ class Player:
         self.jump_scale = self.perso_scale + ((1 * self.scale_factor) / 2)
         self.jump_count = self.perso_scale
 
-    def move_character(self, pressed, is_jumping):
+    def move_character(self, pressed, is_jumping, dt):
         if pressed[pygame.K_LEFT] or pressed[pygame.K_q]:
             self.game.orientation = "Left"
             if self.rect.left <= 0:
@@ -37,7 +37,7 @@ class Player:
         else:
             self.velocity[0] = 0
 
-        self.rect.move_ip(self.velocity[0] * self.speed, self.velocity[1] * self.speed)
+        self.rect.move_ip(self.velocity[0] * self.speed * dt, self.velocity[1] * self.speed * dt)
 
         if not is_jumping and (self.game.is_on_ground == True or self.game.is_on_platform == True):
             if pressed[pygame.K_SPACE] or pressed[pygame.K_UP]:
@@ -46,7 +46,7 @@ class Player:
         if is_jumping:
             self.game.falling = True
             if self.jump_count >= -self.jump_scale:
-                self.velocity[1] = -self.jump_count * abs(self.jump_count) * 0.05
+                self.velocity[1] = -self.jump_count * abs(self.jump_count) * self.game.dt
                 self.jump_count -= 1
             else:
                 self.jump_count = self.jump_scale
