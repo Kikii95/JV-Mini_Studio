@@ -158,8 +158,8 @@ class Game:
                     self.player.rect.right = platform[0].left
                 elif self.player.rect.left < platform[0].right < self.player.rect.right and self.player.rect.bottom > platform[0].top:
                     self.player.rect.left = platform[0].right
-                #elif self.player.rect.top < platform[0].bottom and self.player.rect.bottom > platform[0].top:
-                    #self.player.rect.top = platform[0].bottom
+                elif self.player.rect.top < platform[0].bottom and self.player.rect.bottom > platform[0].top:
+                    self.player.rect.top = platform[0].bottom
 
 
             else:
