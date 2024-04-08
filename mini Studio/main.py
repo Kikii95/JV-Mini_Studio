@@ -24,6 +24,28 @@ BG = (144, 201, 120)
 RED = (255, 0, 0)
 
 
+# Class for the cube object
+class Object:
+    def __init__(self, x, y, size):
+        self.rect = pygame.Rect(x, y, size, size)
+
+    def draw(self):
+        pygame.draw.rect(screen, RED, self.rect)
+
+
+objet = Object(400, 250, 50)
+
+
+# Function to display text on the screen
+def draw_text(text, font, color, x, y):
+    img = font.render(text, True, color)
+    screen.blit(img, (x, y))
+
+
+# Font initialization
+font = pygame.font.SysFont(None, 40)
+
+
 def draw_bg():
     screen.fill(BG)
     pygame.draw.line(screen, RED, (0, 300), (SCREEN_WIDTH, 300))
@@ -134,6 +156,7 @@ while run:
     player.update_animation()
     player.draw()
     enemy.draw()
+    objet.draw()
 
     # update player actions
     if player.alive:
@@ -166,6 +189,11 @@ while run:
                 moving_left = False
             if event.key == pygame.K_d:
                 moving_right = False
+
+    # Check for interactions with the cube
+    if player.rect.colliderect(objet.rect):
+        if pygame.key.get_pressed()[pygame.K_f]:  # Check if 'F' is pressed
+            draw_text("Oui grgrgegeg", font, RED, 400, 100)
 
     pygame.display.update()
 
