@@ -1,211 +1,216 @@
 import pygame
-import button
-import csv
-import pickle
-from pygame.locals import *
+import sys
+from player import Player
+from camera import Camera
 
-pygame.init()
+class Game:
+    def __init__(self, level_file=None):
+        self.screen_width = 1920
+        self.screen_height = 1080
 
-clock = pygame.time.Clock()
-FPS = 60
+        self.background_scale = 1.2
+        self.background = pygame.image.load("img/backgroundEndless_JV.png")
+        self.background = pygame.transform.scale(self.background, ( self.screen_width * self.background_scale, self.screen_height * self.background_scale))  # Double la largeur pour créer l'effet endless
+        self.rect1 = self.background.get_rect()
+        self.rect2 = self.background.get_rect()
+        self.rect1.x = 0 - ((self.screen_width * 1 / 9) * self.background_scale)
+        self.rect2.x = self.screen_width * self.background_scale
+        self.rect1.y = self.screen_height - (self.screen_height * self.background_scale)
+        self.rect2.y = self.screen_height - (self.screen_height * self.background_scale)
 
-SCREEN_WIDTH = 1920
-SCREEN_HEIGHT = 1080
-LOWER_MARGIN = 100
-SIDE_MARGIN = 300
+        self.Camera1X = self.rect1.x
+        self.Camera1Y = self.rect1.y
+        self.Camera2X = self.rect2.x
+        self.Camera2Y = self.rect2.y
 
-screen = pygame.display.set_mode((SCREEN_WIDTH + SIDE_MARGIN, SCREEN_HEIGHT + LOWER_MARGIN))
-pygame.display.set_caption('Level Editor')
+        pygame.init()
+        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
+        self.clock = pygame.time.Clock()
 
-ROWS = 16
-MAX_COLS = 150
-TILE_SIZE = SCREEN_HEIGHT // ROWS
-TILE_TYPES = 21
-level = 0
-current_tile = 0
-scroll_left = False
-scroll_right = False
-scroll = 0
-scroll_speed = 1
-
-pine1_img = pygame.image.load('img/Background/pine1.png').convert_alpha()
-pine2_img = pygame.image.load('img/Background/pine2.png').convert_alpha()
-mountain_img = pygame.image.load('img/Background/mountain.png').convert_alpha()
-sky_img = pygame.image.load('img/Background/sky_cloud.png').convert_alpha()
-img_list = []
-for x in range(TILE_TYPES):
-	img = pygame.image.load(f'img/tile/{x}.png')
-	img = pygame.transform.scale(img, (TILE_SIZE, TILE_SIZE))
-	img_list.append(img)
-
-	save_img = pygame.image.load('img/save_btn.png').convert_alpha()
-	load_img = pygame.image.load('img/load_btn.png').convert_alpha()
-
-GREEN = (144, 201, 120)
-WHITE = (255, 255, 255)
-RED = (200, 25, 25)
-
-#define font
-font = pygame.font.SysFont('Futura', 30)
+        self.player = Player(self)
+        self.camera = Camera(self)
 
 
-world_data = []
-for row in range(ROWS):
-	r = [-1] * MAX_COLS
-	world_data.append(r)
+        self.x = 0
+        self.y = self.screen.get_height() - self.player.perso.get_height()
 
-#create ground
-for tile in range(0, MAX_COLS):
-	world_data[ROWS - 1][tile] = 0
+        self.orientation = "Right"
+        self.running = True
+        self.is_on_ground = False
+        self.is_on_platform = False
 
+        self.ground_width = self.screen_width
+        self.ground_height = 200
 
-#function for outputting text onto the screen
-def draw_text(text, font, text_col, x, y):
-	img = font.render(text, True, text_col)
-	screen.blit(img, (x, y))
+        self.ground = pygame.Rect(0 - self.camera.left_screen_cap , (self.screen_height - 22), self.ground_width + self.camera.right_screen_cap, self.ground_height)
+        self.ground_color = (255, 0, 255)
 
+        self.p1_width = 200
+        self.p1_height = 300
 
-#create function for drawing background
-def draw_bg():
-	screen.fill(GREEN)
-	width = pine1_img.get_width()
-	for x in range(4):
-            screen.blit(pine1_img, (-scroll,0))
+        self.platforms = []
+        self.create_platform(1100, self.screen_height, 200, 100, 'blue')
+        self.create_platform(1600, self.screen_height, 200, 200, 'white')
+        self.create_platform(2100, self.screen_height, 200, 300, 'red')
 
+        self.create_platform(2400, self.screen_height * 6/10, 200, 50, 'yellow')
+        self.create_platform(2600, self.screen_height * 2/10, 200, 50, 'green')
+        self.create_platform(3000, self.screen_height * 1/10, 200, 50, 'purple')
+        self.create_platform(3500, self.screen_height * 2/10, 200, 50, 'black')
+        self.create_platform(3900, self.screen_height * 0/10, 200, 50, 'pink')
 
-#draw grid
-def draw_grid():
-	#vertical lines
-	for c in range(MAX_COLS + 1):
-		pygame.draw.line(screen, WHITE, (c * TILE_SIZE - scroll, 0), (c * TILE_SIZE - scroll, SCREEN_HEIGHT))
-	#horizontal lines
-	for c in range(ROWS + 1):
-		pygame.draw.line(screen, WHITE, (0, c * TILE_SIZE), (SCREEN_WIDTH, c * TILE_SIZE))
+        if level_file:
+            self.load_level(level_file)
+        else:
+            # Charger un niveau par défaut ou lancer l'éditeur de niveaux
+            pygame.display.set_caption("Affichage de texte")
 
-
-#function for drawing the world tiles
-def draw_world():
-	for y, row in enumerate(world_data):
-		for x, tile in enumerate(row):
-			if tile >= 0:
-				screen.blit(img_list[tile], (x * TILE_SIZE - scroll, y * TILE_SIZE))
+    def load_level(self, level_file):
 
 
+    def create_platform(self, x, y, width, height, color=None):
+        if color is None:
+            color = (255, 255, 255)
+        platform = pygame.Rect(x - self.camera.left_screen_cap, y - height, width, height)
+        self.platforms.append((platform, color))
 
-#create buttons
-save_button = button.Button(SCREEN_WIDTH // 2, SCREEN_HEIGHT + LOWER_MARGIN - 50, save_img, 1)
-load_button = button.Button(SCREEN_WIDTH // 2 + 200, SCREEN_HEIGHT + LOWER_MARGIN - 50, load_img, 1)
-#make a button list
-button_list = []
-button_col = 0
-button_row = 0
-for i in range(len(img_list)):
-	tile_button = button.Button(SCREEN_WIDTH + (75 * button_col) + 50, 75 * button_row + 50, img_list[i], 1)
-	button_list.append(tile_button)
-	button_col += 1
-	if button_col == 3:
-		button_row += 1
-		button_col = 0
+    def handle_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
 
+        pressed = pygame.key.get_pressed()
+        if pressed[pygame.K_ESCAPE]:
+            self.running = False
 
-run = True
-while run:
+    def update_background(self):
+        if self.rect1.right <= 0:
+            self.rect1.x = self.rect2.right
+        elif self.rect2.right <= 0:
+            self.rect2.x = self.rect1.right
 
-	clock.tick(FPS)
+        if self.rect1.left >= self.screen_width * self.background_scale :
+            self.rect1.x = (self.rect2.left - (self.screen_width * self.background_scale))
+        elif self.rect2.left >= self.screen_width * self.background_scale:
+            self.rect2.x = (self.rect1.left - (self.screen_width * self.background_scale))
 
-	draw_bg()
-	draw_grid()
-	draw_world()
+    def is_visible(self, rect):
+        camera_rect = pygame.Rect(self.camera.CameraX, self.camera.CameraY, self.screen_width, self.screen_height)
+        return camera_rect.colliderect(rect)
 
-	draw_text(f'Level: {level}', font, WHITE, 10, SCREEN_HEIGHT + LOWER_MARGIN - 90)
-	draw_text('Press UP or DOWN to change level', font, WHITE, 10, SCREEN_HEIGHT + LOWER_MARGIN - 60)
+    def text(self, text, text_size, font_color, position):
+        font_size = int(float((text_size * self.screen_width) / 1920))
+        font = pygame.font.Font(None, font_size)
+        margin = font_size
 
-	#save and load data
-	if save_button.draw(screen):
-		#save level data
-		with open(f'level{level}_data.csv', 'w', newline='') as csvfile:
-			writer = csv.writer(csvfile, delimiter = ',')
-			for row in world_data:
-				writer.writerow(row)
-		#alternative pickle method
-		#pickle_out = open(f'level{level}_data', 'wb')
-		#pickle.dump(world_data, pickle_out)
-		#pickle_out.close()
-	if load_button.draw(screen):
-		#load in level data
-		#reset scroll back to the start of the level
-		scroll = 0
-		with open(f'level{level}_data.csv', newline='') as csvfile:
-			reader = csv.reader(csvfile, delimiter = ',')
-			for x, row in enumerate(reader):
-				for y, tile in enumerate(row):
-					world_data[x][y] = int(tile)
-		#alternative pickle method
-		#world_data = []
-		#pickle_in = open(f'level{level}_data', 'rb')
-		#world_data = pickle.load(pickle_in)
-				
+        positions = {
+            "top_left": (margin, margin),
+            "top_center": (self.screen_width // 2, margin),
+            "top_right": (self.screen_width - margin, margin),
+            "mid_left": (margin, self.screen_height // 2),
+            "mid_center": (self.screen_width // 2, self.screen_height // 2),
+            "mid_right": (self.screen_width - margin, self.screen_height // 2),
+            "down_left": (margin, self.screen_height - margin),
+            "down_center": (self.screen_width // 2, self.screen_height - margin),
+            "down_right": (self.screen_width - margin, self.screen_height - margin)
+        }
 
-	#draw tile panel and tiles
-	pygame.draw.rect(screen, GREEN, (SCREEN_WIDTH, 0, SIDE_MARGIN, SCREEN_HEIGHT))
+        text_position = positions.get(position, (0, 0))
 
-	#choose a tile
-	button_count = 0
-	for button_count, i in enumerate(button_list):
-		if i.draw(screen):
-			current_tile = button_count
+        text_surface = font.render(text, True, font_color)
+        text_rect = text_surface.get_rect(center = text_position)
 
-	#highlight the selected tile
-	pygame.draw.rect(screen, RED, button_list[current_tile].rect, 3)
+        if text_rect.left < margin:
+            text_rect.left = margin
+        elif text_rect.right > self.screen_width - margin:
+            text_rect.right = self.screen_width - margin
 
-	#scroll the map
-	if scroll_left == True and scroll > 0:
-		scroll -= 5 * scroll_speed
-	if scroll_right == True and scroll < (MAX_COLS * TILE_SIZE) - SCREEN_WIDTH:
-		scroll += 5 * scroll_speed
+        if text_rect.top < margin:
+            text_rect.top = margin
+        elif text_rect.bottom > self.screen_height - margin:
+            text_rect.bottom = self.screen_height - margin
 
-	#add new tiles to the screen
-	#get mouse position
-	pos = pygame.mouse.get_pos()
-	x = (pos[0] + scroll) // TILE_SIZE
-	y = pos[1] // TILE_SIZE
+        self.screen.blit(text_surface, text_rect)
 
-	#check that the coordinates are within the tile area
-	if pos[0] < SCREEN_WIDTH and pos[1] < SCREEN_HEIGHT:
-		#update tile value
-		if pygame.mouse.get_pressed()[0] == 1:
-			if world_data[y][x] != current_tile:
-				world_data[y][x] = current_tile
-		if pygame.mouse.get_pressed()[2] == 1:
-			world_data[y][x] = -1
+    def display(self):
+        self.screen.fill((152, 140, 122))
+        self.screen.blit(self.background, self.rect1)
+        self.screen.blit(self.background, self.rect2)
+
+        for platform in self.platforms:
+            if self.is_visible(platform[0]):
+                pygame.draw.rect(self.screen, platform[1], platform[0])
+        #if self.is_visible(self.ground):
+            #pygame.draw.rect(self.screen, self.ground_color, self.ground)
 
 
-	for event in pygame.event.get():
-		if event.type == pygame.QUIT:
-			run = False
-		#keyboard presses
-		if event.type == pygame.KEYDOWN:
-			if event.key == pygame.K_UP:
-				level += 1
-			if event.key == pygame.K_DOWN and level > 0:
-				level -= 1
-			if event.key == pygame.K_LEFT:
-				scroll_left = True
-			if event.key == pygame.K_RIGHT:
-				scroll_right = True
-			if event.key == pygame.K_RSHIFT:
-				scroll_speed = 5
+        self.player.draw_character()
+        self.text("Bienvenue sur cette Alpha du jeu ! :p", 65, "black", "top_center")
+
+        pygame.display.flip()
+
+    def update(self, pressed):
+        self.player.move_character(pressed, self.player.is_jumping, self.dt)
+        #keys = pygame.key.get_pressed()
+        #if keys[pygame.K_LEFT] or keys[pygame.K_RIGHT] or keys[pygame.K_d] or keys[pygame.K_q] or keys[pygame.K_SPACE]:
+            #self.camera.update()
+        self.camera.update()
+
+        for platform in self.platforms:
+            if platform[0].colliderect(self.player.rect):
+                if self.player.rect.bottom > platform[0].top > self.player.rect.top and (platform[0].left <= self.player.rect.left + (self.player.perso_width * 3 / 4) and platform[0].right >= self.player.rect.right - (self.player.perso_width * 3 / 4)) and self.player.velocity[1] > 0:
+                    self.is_on_platform = True
+                    self.player.velocity[1] = 0
+                    self.player.rect.bottom = platform[0].top
+                elif self.player.rect.right > platform[0].left > self.player.rect.left and self.player.rect.bottom > platform[0].top:
+                    self.player.rect.right = platform[0].left
+                elif self.player.rect.left < platform[0].right < self.player.rect.right and self.player.rect.bottom > platform[0].top:
+                    self.player.rect.left = platform[0].right
+                elif self.player.rect.top < platform[0].bottom and self.player.rect.bottom > platform[0].top:
+                    self.player.rect.top = platform[0].bottom
 
 
-		if event.type == pygame.KEYUP:
-			if event.key == pygame.K_LEFT:
-				scroll_left = False
-			if event.key == pygame.K_RIGHT:
-				scroll_right = False
-			if event.key == pygame.K_RSHIFT:
-				scroll_speed = 1
+            else:
+                self.p1_color = (255, 0, 0)
 
 
-	pygame.display.update()
+        if self.ground.colliderect(self.player.rect):
+            self.ground_color = (0, 0, 255)
+            self.is_on_ground = True
+            self.player.velocity[1] = 0
+            self.player.rect.bottom = self.ground.top
+            #self.ground.top += 1
+        else:
+            self.ground_color = (200, 0, 200)
 
-pygame.quit()
+        if self.player.velocity[1] != 0:
+            self.is_on_ground = False
+            self.is_on_platform = False
+        if (not self.is_on_platform or not self.is_on_ground) and not self.player.is_jumping:
+            self.player.apply_gravity()
+
+
+    def run(self):
+        self.dt = 0
+        FPSTarget = 60
+        dtTarget = 1 / FPSTarget
+        while self.running:
+            start = pygame.time.get_ticks()
+
+            self.camera.update()
+            self.update_background()
+            self.handle_events()
+            pressed = pygame.key.get_pressed()
+            self.update(pressed)
+            self.display()
+            self.dt = (pygame.time.get_ticks() - start) / 1000
+            if self.dt < dtTarget:
+                pygame.time.wait(int(1000 * (dtTarget - self.dt)))
+                self.dt = dtTarget
+
+        pygame.quit()
+
+
+if __name__ == "__main__":
+    game = Game()
+    game.run()
