@@ -66,6 +66,41 @@ class Game:
         platform = pygame.Rect(x - self.camera.left_screen_cap, y - height, width, height)
         self.platforms.append((platform, color))
 
+    def check_collision(self):
+        if self.is_on_ground or self.is_on_platform:
+            self.player.velocity_y = 0
+
+        # Vérifier les collisions avec les plateformes
+        for platform in self.platforms:
+            if platform[0].colliderect(self.player.rect):
+                if self.player.rect.bottom > platform[0].top > self.player.rect.top and (platform[0].left <= self.player.rect.left + (self.player.perso_width * 3 / 4) and platform[0].right >= self.player.rect.right - (self.player.perso_width * 3 / 4)) :
+                    # Collision avec le dessus de la plateforme
+                    self.is_on_platform = True
+                    self.player.velocity_y = 0
+                    self.player.rect.bottom = platform[0].top
+                elif self.player.rect.top < platform[0].bottom < self.player.rect.bottom and (platform[0].left <= self.player.rect.left + (self.player.perso_width * 3 / 4) and platform[0].right >= self.player.rect.right - (self.player.perso_width * 3 / 4)) :
+                    # Collision avec le bas de la plateforme
+                    self.player.rect.top = platform[0].bottom
+                    self.is_on_platform = False
+                elif self.player.rect.right > platform[0].left > self.player.rect.left:
+                    self.player.rect.right = platform[0].left
+                    self.is_on_platform = False
+                elif self.player.rect.left < platform[0].right < self.player.rect.right:
+                    # Collision avec le côté gauche de la plateforme
+                    self.player.rect.left = platform[0].right
+                    self.is_on_platform = False
+
+        # Vérifier la collision avec le sol
+        if self.ground.colliderect(self.player.rect):
+            self.is_on_ground = True
+            self.player.velocity_y = 0
+            self.player.rect.bottom = self.ground.top
+        else:
+            self.is_on_ground = False
+
+        if self.is_on_ground or self.is_on_platform:
+            self.player.gliding = False
+
     def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -81,7 +116,7 @@ class Game:
         elif self.rect2.right <= 0:
             self.rect2.x = self.rect1.right
 
-        if self.rect1.left >= self.screen_width * self.background_scale :
+        if self.rect1.left >= self.screen_width * self.background_scale:
             self.rect1.x = (self.rect2.left - (self.screen_width * self.background_scale))
         elif self.rect2.left >= self.screen_width * self.background_scale:
             self.rect2.x = (self.rect1.left - (self.screen_width * self.background_scale))
@@ -135,51 +170,20 @@ class Game:
         #if self.is_visible(self.ground):
             #pygame.draw.rect(self.screen, self.ground_color, self.ground)
 
-
         self.player.draw_character()
-        self.text("Bienvenue sur cette Alpha du jeu ! :p", 65, "black", "top_center")
+        self.text("Bienvenue sur cette Alpha du jeu ! :p", 65, "White", "top_center")
 
         pygame.display.flip()
 
     def update(self, pressed):
-        self.player.move_character(pressed, self.player.is_jumping, self.dt)
-        #keys = pygame.key.get_pressed()
-        #if keys[pygame.K_LEFT] or keys[pygame.K_RIGHT] or keys[pygame.K_d] or keys[pygame.K_q] or keys[pygame.K_SPACE]:
-            #self.camera.update()
+        self.player.move_character(pressed, self.dt)
         self.camera.update()
-
-        for platform in self.platforms:
-            if platform[0].colliderect(self.player.rect):
-                if self.player.rect.bottom > platform[0].top > self.player.rect.top and (platform[0].left <= self.player.rect.left + (self.player.perso_width * 3 / 4) and platform[0].right >= self.player.rect.right - (self.player.perso_width * 3 / 4)) and self.player.velocity[1] > 0:
-                    self.is_on_platform = True
-                    self.player.velocity[1] = 0
-                    self.player.rect.bottom = platform[0].top
-                elif self.player.rect.right > platform[0].left > self.player.rect.left and self.player.rect.bottom > platform[0].top:
-                    self.player.rect.right = platform[0].left
-                elif self.player.rect.left < platform[0].right < self.player.rect.right and self.player.rect.bottom > platform[0].top:
-                    self.player.rect.left = platform[0].right
-                elif self.player.rect.top < platform[0].bottom and self.player.rect.bottom > platform[0].top:
-                    self.player.rect.top = platform[0].bottom
-
-
-            else:
-                self.p1_color = (255, 0, 0)
-
-
-        if self.ground.colliderect(self.player.rect):
-            self.ground_color = (0, 0, 255)
-            self.is_on_ground = True
-            self.player.velocity[1] = 0
-            self.player.rect.bottom = self.ground.top
-            #self.ground.top += 1
+        self.check_collision()
+        if self.player.gliding == True:
+            if pressed[pygame.K_SPACE]:
+                self.camera.down_screen_cap = self.screen_height * (5.25 / 9)
         else:
-            self.ground_color = (200, 0, 200)
-
-        if self.player.velocity[1] != 0:
-            self.is_on_ground = False
-            self.is_on_platform = False
-        if (not self.is_on_platform or not self.is_on_ground) and not self.player.is_jumping:
-            self.player.apply_gravity()
+            self.camera.down_screen_cap = self.screen_height * (6.5 / 9)
 
 
     def run(self):
