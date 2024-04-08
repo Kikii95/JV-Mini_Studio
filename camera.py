@@ -43,3 +43,33 @@ class Camera:
             for platform in self.game.platforms:
                 platform[0].y -= delta_y
             self.game.ground.y -= delta_y
+
+    
+    def is_talking(self):
+        delta_x = self.game.player.rect.x - self.right_screen_cap
+        self.game.player.rect.x = self.right_screen_cap
+        self.game.rect1.x -= delta_x
+        self.game.rect2.x -= delta_x
+        for platform in self.game.platforms:
+            platform[0].x -= delta_x
+
+        if self.game.player.rect.y < self.top_screen_cap:
+            delta_y = self.top_screen_cap - self.game.player.rect.y
+            self.game.player.rect.y = self.top_screen_cap
+            self.game.rect1.y += delta_y
+            self.game.rect2.y += delta_y
+            for platform in self.game.platforms:
+                platform[0].y += delta_y
+            self.game.ground.y += delta_y
+
+        for i in range (self.down_screen_cap - self.game.player.rect.y):
+            delta_y = self.game.player.rect.y - self.down_screen_cap
+            self.game.player.rect.y = self.down_screen_cap
+            self.game.rect1.y -= delta_y
+            self.game.rect2.y -= delta_y
+            for platform in self.game.platforms:
+                platform[0].y -= delta_y
+            self.game.ground.y -= delta_y
+
+        if self.game.player.rect.right < self.right_screen_cap:
+            self.game.player.move_character()
