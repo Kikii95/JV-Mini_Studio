@@ -29,50 +29,6 @@ def draw_bg():
     pygame.draw.line(screen, RED, (0, 300), (SCREEN_WIDTH, 300))
 
 
-def pause_menu():
-    paused = True
-    while paused:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                quit()
-
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_o:
-                    paused = False
-
-        screen.fill((0, 0, 0))
-        pause_font = pygame.font.Font(None, int(SCREEN_WIDTH / 20))
-        button_width = SCREEN_WIDTH / 4
-        button_height = SCREEN_HEIGHT / 15
-
-        resume_text = pause_font.render("Resume", True, (255, 255, 255))
-        restart_text = pause_font.render("Restart", True, (255, 255, 255))
-        main_menu_text = pause_font.render("Main Menu", True, (255, 255, 255))
-        quit_text = pause_font.render("Quit Game", True, (255, 255, 255))
-
-        button_gap = SCREEN_HEIGHT / 20
-        button_y = SCREEN_HEIGHT / 4
-
-        resume_button = pygame.Rect((SCREEN_WIDTH - button_width) / 2, button_y, button_width, button_height)
-        restart_button = pygame.Rect((SCREEN_WIDTH - button_width) / 2, button_y + button_height + button_gap, button_width, button_height)
-        main_menu_button = pygame.Rect((SCREEN_WIDTH - button_width) / 2, button_y + (button_height + button_gap) * 2, button_width, button_height)
-        quit_button = pygame.Rect((SCREEN_WIDTH - button_width) / 2, button_y + (button_height + button_gap) * 3, button_width, button_height)
-
-        pygame.draw.rect(screen, (255, 0, 0), resume_button)
-        pygame.draw.rect(screen, (255, 0, 0), restart_button)
-        pygame.draw.rect(screen, (255, 0, 0), main_menu_button)
-        pygame.draw.rect(screen, (255, 0, 0), quit_button)
-
-        screen.blit(resume_text, ((SCREEN_WIDTH - resume_text.get_width()) / 2, button_y))
-        screen.blit(restart_text, ((SCREEN_WIDTH - restart_text.get_width()) / 2, button_y + button_height + button_gap))
-        screen.blit(main_menu_text, ((SCREEN_WIDTH - main_menu_text.get_width()) / 2, button_y + (button_height + button_gap) * 2))
-        screen.blit(quit_text, ((SCREEN_WIDTH - quit_text.get_width()) / 2, button_y + (button_height + button_gap) * 3))
-
-        pygame.display.update()
-        clock.tick(60)
-
-
 class Player(pygame.sprite.Sprite):
     def __init__(self, char_type, x, y, scale, speed):
         pygame.sprite.Sprite.__init__(self)
@@ -203,8 +159,6 @@ while run:
                 player.jump = True
             if event.key == pygame.K_ESCAPE:
                 run = False
-            if event.key == pygame.K_o:
-                pause_menu()
 
         # keyboard button released
         if event.type == pygame.KEYUP:
