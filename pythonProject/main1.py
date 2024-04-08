@@ -24,7 +24,7 @@ TILE_TYPES = 21
 level = 0
 current_tile = 0
 scroll_left = False
-scroll_right = False
+scroll_right = False 
 scroll = 0
 scroll_speed = 1
 

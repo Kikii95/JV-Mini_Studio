@@ -65,7 +65,6 @@ class Game:
             # Charger un niveau par défaut ou lancer l'éditeur de niveaux
             pygame.display.set_caption("Affichage de texte")
 
-    def load_level(self, level_file):
 
 
     def create_platform(self, x, y, width, height, color=None):
