@@ -23,6 +23,7 @@ moving_right = False
 BG = (144, 201, 120)
 RED = (255, 0, 0)
 BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
 
 
 # Class for the object
@@ -201,7 +202,7 @@ def draw_text_dynamic(text, font, color, x, y, delay=50):
                 return
 
 
-player = Player("player", 200, 200, 3, 5)
+player = Player("player", 200, 200, 0.1, 5)
 npc = NPC(600, 200, 50, 100)
 flower_seed = FlowerSeed(200, 250)
 
