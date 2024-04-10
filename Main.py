@@ -18,7 +18,7 @@ balle = pygame.image.load("Images/golfBall.png").convert_alpha()
 fond_inv = pygame.image.load("Images/fondGris.jpg").convert_alpha()
 ballinv = balle.copy()
 
-#####
+##-----------------------##
 class Personnage:
     def __init__(self, image):
         self.image = pygame.image.load(image).convert_alpha()
@@ -73,13 +73,11 @@ def detecter_hover(mouse_pos):
     global inventaire
     for i, (item_rect, item_image) in enumerate(inventaire):
         if item_rect.collidepoint(mouse_pos):
-            # Si la souris survole l'objet, retourner l'index de l'objet et son emplacement
             return i, item_rect, item_image
-    # Si aucun objet n'est survolé, retourner None
     return None, None, None
 
 continuer = True
-item_index = None  # Déclarez item_index en dehors de la boucle principale
+item_index = None
 while continuer:
     for event in pygame.event.get():
         if event.type == QUIT:
@@ -92,7 +90,6 @@ while continuer:
                     balrect = bal.rect
                     if balrect.collidepoint(mouse_x, mouse_y):
                         item_index = index
-                        # Vérifier le type de l'objet
                         if isinstance(bal, Balle):
                             texte_obj ="Balle"
                         elif isinstance(bal, Personnage):
@@ -123,7 +120,7 @@ while continuer:
                 if startinv==0:
                     inv_open = False
                     startinv += 1 
-                inv_open = afficher_inventaire(inv_open)  # Afficher l'inventaire
+                inv_open = afficher_inventaire(inv_open)
 
             elif event.key == K_j:
                     compteur_objets += 2
@@ -134,12 +131,11 @@ while continuer:
     fenetre.blit(perso, persoRect)
     fenetre.blit(fond_inv,fond_invRect)
     fenetre.blit(balle, balleRect)
-    #fenetre.blit(ballinv, ballinvrect)
     if inv_open == True and startinv!=0:
         start_x = 575
         for bal in inventaire:
-            bal.affiche(fenetre)  # Utilisez la méthode affiche pour afficher l'objet
-            balrect = bal.rect  # Obtenez le rect de l'objet
+            bal.affiche(fenetre)  
+            balrect = bal.rect 
             balrect.topleft = (start_x, 300)
             start_x += balrect.width + 10
     if item_index is not None:
