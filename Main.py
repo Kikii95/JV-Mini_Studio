@@ -1,5 +1,6 @@
 import pygame
 from pygame.locals import *
+from balle import Balle
 from random import randint
 
 pygame.init()
@@ -15,12 +16,24 @@ fond = pygame.image.load("Images/background.png").convert()
 perso = pygame.image.load("Images/Perso.png").convert_alpha()
 balle = pygame.image.load("Images/golfBall.png").convert_alpha()
 fond_inv = pygame.image.load("Images/fondGris.jpg").convert_alpha()
+ballinv = balle.copy()
+
+#####
+class Personnage:
+    def __init__(self, image):
+        self.image = pygame.image.load(image).convert_alpha()
+        self.rect = self.image.get_rect()
+
+    def affiche(self, fenetre):
+        fenetre.blit(self.image, self.rect)
+
 
 # Positionnement initial des personnages et de la balle
 persoRect = perso.get_rect()
 persoRect.topleft = (750, 754)
 balleRect = balle.get_rect()
 balleRect.topleft = (650, 754)
+ballinvrect = ballinv.get_rect()
 fond_invRect = fond_inv.get_rect()
 fond_invRect.topleft = (550, 275)
 fond_inv.set_alpha(0)
@@ -39,28 +52,22 @@ text_color = (255, 255, 255)
 NOIR = (0, 0, 0)
 BLANC = (255, 255, 255)
 
-inv_open = False
+inv_open = True
+startinv = 0
 balrectemp = balleRect.topleft
 
 # Police de caractères pour l'affichage de l'inventaire
 font = pygame.font.Font(None, 36)
 
-def afficher_inventaire(inv_open,balrectemp):
-    alphatemp = balle.get_alpha
-    
+def afficher_inventaire(inv_open,):
     if inv_open == False:
-        balrectemp = balleRect.topleft
-        balleRect.topleft = (575, 300)
-        balle.set_alpha(255)
         fond_inv.set_alpha(255)
         inv_open = True
-        return inv_open, balrectemp
+        return inv_open
     elif inv_open == True:
-        balleRect.topleft = (balrectemp)
-        balle.set_alpha(0)
         fond_inv.set_alpha(0)
         inv_open = False
-        return inv_open, balrectemp
+        return inv_open
 
 def detecter_hover(mouse_pos):
     global inventaire
@@ -71,15 +78,26 @@ def detecter_hover(mouse_pos):
     # Si aucun objet n'est survolé, retourner None
     return None, None, None
 
-# Boucle principale du jeu
 continuer = True
+item_index = None  # Déclarez item_index en dehors de la boucle principale
 while continuer:
     for event in pygame.event.get():
         if event.type == QUIT:
             continuer = False
         elif event.type == MOUSEMOTION:
             mouse_x, mouse_y = event.pos
-            item_index = balleRect.collidepoint(mouse_x, mouse_y)
+            if inv_open:
+                item_index = None
+                for index, bal in enumerate(inventaire):
+                    balrect = bal.rect
+                    if balrect.collidepoint(mouse_x, mouse_y):
+                        item_index = index
+                        # Vérifier le type de l'objet
+                        if isinstance(bal, Balle):
+                            texte_obj ="Balle"
+                        elif isinstance(bal, Personnage):
+                            texte_obj ="Personnage"
+                        break
         elif event.type == KEYDOWN:
             if event.key == K_LEFT:
                 if persoRect.left >= 10:
@@ -91,35 +109,48 @@ while continuer:
                 if balleRect.colliderect(persoRect):
                     balle_dans_inventaire = True
                     compteur_objets += 1
-                    inventaire.append((balleRect, balle))  # Ajout de la balle à l'inventaire
-                    balleRect.topleft = (randint(100, largeur_fenetre - 100), -100)
+                    inventaire.append(Balle("Images/golfBall.png"))
                     balle.set_alpha(0)
-
             elif event.key == K_a and compteur_objets >= 1:
                 if balle_dans_inventaire:
                     balleRect.topleft = (persoRect.right + 10, persoRect.top)
                     balle.set_alpha(255)
                     compteur_objets -= 1
-
             elif event.key == K_e:
                 # Ouvrir l'inventaire en appuyant sur la touche E
                 print("Inventaire ouvert")
                 print("Contenu de l'inventaire:", inventaire)
-                inv_open, balrectemp = afficher_inventaire(inv_open,balrectemp)  # Afficher l'inventaire
+                if startinv==0:
+                    inv_open = False
+                    startinv += 1 
+                inv_open = afficher_inventaire(inv_open)  # Afficher l'inventaire
+
+            elif event.key == K_j:
+                    compteur_objets += 2
+                    inventaire.append(Balle("Images/golfBall.png"))
+                    inventaire.append(Personnage("Images/Perso.png"))
     fenetre.fill(BLANC)
     fenetre.blit(fond, (0, 0))
     fenetre.blit(perso, persoRect)
     fenetre.blit(fond_inv,fond_invRect)
     fenetre.blit(balle, balleRect)
-    if item_index:
-        # Si la souris survole un objet, afficher l'image de l'objet
-        texte_objet1 = font.render("Objet 1 survolé", True, NOIR)
-        fenetre.blit(texte_objet1, (balleRect.right + 10, balleRect.top))
+    #fenetre.blit(ballinv, ballinvrect)
+    if inv_open == True and startinv!=0:
+        start_x = 575
+        for bal in inventaire:
+            bal.affiche(fenetre)  # Utilisez la méthode affiche pour afficher l'objet
+            balrect = bal.rect  # Obtenez le rect de l'objet
+            balrect.topleft = (start_x, 300)
+            start_x += balrect.width + 10
+    if item_index is not None:
+        # Si la souris survole un objet, afficher le texte d'information à côté de cet objet
+        texte_objet = font.render(f"{texte_obj} {item_index + 1} survolé", True, NOIR)
+        fenetre.blit(texte_objet, (balrect.right + 10, balrect.top))
     
     
 
     # Affichage du compteur d'objets
-    texte_compteur = font.render(f"Balles : {compteur_objets}", True, (255, 255, 255))
+    texte_compteur = font.render(f"Objets : {compteur_objets}", True, (255, 255, 255))
     fenetre.blit(texte_compteur, (balle_compteur_rect.right + 10, balle_compteur_rect.top))
     fenetre.blit(balle_compteur_image, balle_compteur_rect)
 
