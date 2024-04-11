@@ -32,7 +32,6 @@ pine1_img = pygame.image.load('img/fond.webp').convert_alpha()
 pine1_img = pygame.transform.scale(pine1_img, (600, 600))
 
 
-
 img_list = []
 for x in range(TILE_TYPES):
 	img = pygame.image.load(f'img/tile0/{x}.png')
