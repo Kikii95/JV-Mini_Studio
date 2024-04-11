@@ -37,6 +37,7 @@ start_intro = False
 #define player action variables
 moving_left = False
 moving_right = False
+is_running = False
 
 
 #load music and sounds
@@ -136,7 +137,7 @@ class Soldier(pygame.sprite.Sprite):
 		self.idling_counter = 0
 		
 		#load all images for the players
-		animation_types = ['Idle', 'Run', 'Jump', 'Death']
+		animation_types = ['Idle', 'Walk', 'Run', 'Jump']
 		for animation in animation_types:
 			#reset temporary list of images
 			temp_list = []
@@ -169,17 +170,28 @@ class Soldier(pygame.sprite.Sprite):
 
 		#assign movement variables if moving left or right
 		if moving_left:
-			dx = -self.speed
+			if is_running:
+				dx = -(self.speed * 2)
+			else:
+				dx = -self.speed
 			self.flip = True
 			self.direction = -1
 		if moving_right:
-			dx = self.speed
+			if is_running:
+				dx = self.speed * 2
+			else:
+				dx = self.speed
 			self.flip = False
 			self.direction = 1
 
+		if moving_right or moving_left:
+			self.is_moving = True
+		else:
+			self.is_moving = False
+
 		#jump
 		if self.jump == True and self.in_air == False:
-			self.vel_y = -11
+			self.vel_y = -15
 			self.jump = False
 			self.in_air = True
 
@@ -425,8 +437,6 @@ class HealthBar():
 
 
 
-
-
 	def update(self):
 		#check for collision with level
 		for tile in world.obstacle_list:
@@ -540,7 +550,6 @@ exit_button = button.Button(SCREEN_WIDTH // 2 - 110, SCREEN_HEIGHT // 2 + 50, ex
 restart_button = button.Button(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 - 50, restart_img, 2)
 
 #create sprite groups
-bullet_group = pygame.sprite.Group()
 item_box_group = pygame.sprite.Group()
 decoration_group = pygame.sprite.Group()
 water_group = pygame.sprite.Group()
@@ -588,11 +597,11 @@ while run:
 
 
 
-
 		player.update()
 		player.draw()
 
 
+		#update and draw groups
 		item_box_group.update()
 		decoration_group.update()
 		water_group.update()
@@ -612,14 +621,13 @@ while run:
 		#update player actions
 		if player.alive:
 			if player.in_air:
-				player.update_action(3)  # 2: jump
-			elif player.is_running:
-				player.update_action(2)  # 2: run
-			elif player.is_moving and not player.is_running:
-				player.update_action(1)  # 1: walk
+				player.update_action(3)#2: jump
+			elif (moving_left or moving_right) and is_running:
+				player.update_action(2)#2: run
+			elif moving_left or moving_right:
+				player.update_action(1)#1: walk
 			else:
-				player.update_action(0)  # 0: idle
-			# self.player.move(self.moving_left, self.moving_right)
+				player.update_action(0)#0: idle
 			screen_scroll, level_complete = player.move(moving_left, moving_right)
 			bg_scroll -= screen_scroll
 			#check if player has completed the level
@@ -670,6 +678,15 @@ while run:
 				jump_fx.play()
 			if event.key == pygame.K_ESCAPE:
 				run = False
+
+		pressed = pygame.key.get_pressed()
+		if pressed[pygame.K_LSHIFT]:
+			if moving_left or moving_right:
+				is_running = True
+			else:
+				is_running = False
+		else:
+			is_running = False
 
 
 		#keyboard button released
