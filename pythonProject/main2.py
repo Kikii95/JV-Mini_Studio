@@ -29,7 +29,7 @@ TILE_TYPES = 21
 MAX_LEVELS = 3
 screen_scroll = 0
 bg_scroll = 0
-level = 1
+level = 2
 start_game = False
 start_intro = False
 
@@ -62,7 +62,7 @@ sky_img = pygame.image.load('img/Background/sky_cloud.png').convert_alpha()
 #store tiles in a list
 img_list = []
 for x in range(TILE_TYPES):
-	img = pygame.image.load(f'img/Tile1/{x}.png')
+	img = pygame.image.load(f'img/tile2/{x}.png')
 	img = pygame.transform.scale(img, (TILE_SIZE, TILE_SIZE))
 	img_list.append(img)
 
