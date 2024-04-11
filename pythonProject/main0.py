@@ -422,23 +422,12 @@ class HealthBar():
 		self.health = health
 		self.max_health = max_health
 
-	def draw(self, health):
-		#update with new health
-		self.health = health
-		#calculate health ratio
-		ratio = self.health / self.max_health
-		pygame.draw.rect(screen, BLACK, (self.x - 2, self.y - 2, 154, 24))
-		pygame.draw.rect(screen, RED, (self.x, self.y, 150, 20))
-		pygame.draw.rect(screen, GREEN, (self.x, self.y, 150 * ratio, 20))
+
+
 
 
 
 	def update(self):
-		#move bullet
-		self.rect.x += (self.direction * self.speed) + screen_scroll
-		#check if bullet has gone off screen
-		if self.rect.right < 0 or self.rect.left > SCREEN_WIDTH:
-			self.kill()
 		#check for collision with level
 		for tile in world.obstacle_list:
 			if tile[1].colliderect(self.rect):
@@ -594,8 +583,7 @@ while run:
 		draw_bg()
 		#draw world map
 		world.draw()
-		#show player health
-		health_bar.draw(player.health)
+
 
 
 
@@ -605,13 +593,10 @@ while run:
 		player.draw()
 
 
-		#update and draw groups
-		bullet_group.update()
 		item_box_group.update()
 		decoration_group.update()
 		water_group.update()
 		exit_group.update()
-		bullet_group.draw(screen)
 		item_box_group.draw(screen)
 		decoration_group.draw(screen)
 		water_group.draw(screen)
@@ -627,11 +612,14 @@ while run:
 		#update player actions
 		if player.alive:
 			if player.in_air:
-				player.update_action(2)#2: jump
-			elif moving_left or moving_right:
-				player.update_action(1)#1: run
+				player.update_action(3)  # 2: jump
+			elif player.is_running:
+				player.update_action(2)  # 2: run
+			elif player.is_moving and not player.is_running:
+				player.update_action(1)  # 1: walk
 			else:
-				player.update_action(0)#0: idle
+				player.update_action(0)  # 0: idle
+			# self.player.move(self.moving_left, self.moving_right)
 			screen_scroll, level_complete = player.move(moving_left, moving_right)
 			bg_scroll -= screen_scroll
 			#check if player has completed the level
