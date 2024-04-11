@@ -6,13 +6,13 @@ class PhotoAlbum:
         self.current_page = 0
         self.screen_width, self.screen_height = self.screen.get_size()
         self.album_background = pygame.transform.scale(pygame.image.load('album_background.png'), (self.screen_width, self.screen_height))  # Chargement arrière-plan de l'album
-        self.next_button = pygame.transform.scale(pygame.image.load('next_button.png'), (50, 50))  # Chargement bouton suivant
-        self.prev_button = pygame.transform.scale(pygame.image.load('prev_button.png'), (50, 50))  # Chargement bouton précédent
-        self.close_button = pygame.transform.scale(pygame.image.load('close_button.png'), (50, 50))  # Chargement bouton de fermeture
-        self.pages = [[(pygame.transform.scale(pygame.image.load('photo1.png'), (self.screen_width//3, self.screen_height//3)), (self.screen_width//6, self.screen_height//4)),  # Chargement des photos
-                (pygame.transform.scale(pygame.image.load('photo2.png'), (self.screen_width//3, self.screen_height//3)), (self.screen_width//2, self.screen_height//2))],
-                [(pygame.transform.scale(pygame.image.load('photo3.png'), (self.screen_width//3, self.screen_height//3)), (self.screen_width//6, self.screen_height//4)),  
-                (pygame.transform.scale(pygame.image.load('photo4.png'), (self.screen_width//3, self.screen_height//3)), (self.screen_width//2, self.screen_height//2))]]
+        self.next_button = pygame.transform.scale(pygame.image.load('next_button.png'), (200, 200))  # Loading next button
+        self.prev_button = pygame.transform.scale(pygame.image.load('prev_button.png'), (200, 200))  # Loading previous button
+        self.close_button = pygame.transform.scale(pygame.image.load('close_button.png'), (100, 100))  # Chargement bouton de fermeture        
+        self.pages = [[(pygame.transform.scale(pygame.image.load('photo1.png'), (self.screen_width//3, self.screen_height//3)), (self.screen_width//6 - 50, self.screen_height//4)),  # Chargement des photos
+        (pygame.transform.scale(pygame.image.load('photo2.png'), (self.screen_width//3, self.screen_height//3)), (self.screen_width//2 + 50, self.screen_height//2))],
+        [(pygame.transform.scale(pygame.image.load('photo3.png'), (self.screen_width//3, self.screen_height//3)), (self.screen_width//6 - 50, self.screen_height//4)),  
+        (pygame.transform.scale(pygame.image.load('photo4.png'), (self.screen_width//3, self.screen_height//3)), (self.screen_width//2 + 50, self.screen_height//2))]]
         self.hovered_photo = None
         self.clicked_photo = None
         self.back_button = pygame.transform.scale(pygame.image.load('prev_button.png'), (50, 50))  
@@ -39,16 +39,15 @@ class PhotoAlbum:
                 elif not self.clicked_photo:
                     if self.close_button.get_rect(topleft=(10, 10)).collidepoint(x, y):
                         self.visible = False
-                    elif self.current_page < len(self.pages) - 1 and self.next_button.get_rect(topleft=(self.screen_width - 60, self.screen_height - 60)).collidepoint(x, y):
+                    elif self.current_page < len(self.pages) - 1 and self.next_button.get_rect(topleft=(self.screen_width - self.next_button.get_width() - 30, self.screen_height - self.next_button.get_height() - 10)).collidepoint(x, y):
                         self.current_page += 1
-                    elif self.current_page > 0 and self.prev_button.get_rect(topleft=(10, self.screen_height - 60)).collidepoint(x, y):
+                    elif self.current_page > 0 and self.prev_button.get_rect(topleft=(50, self.screen_height - self.prev_button.get_height() - 10)).collidepoint(x, y):
                         self.current_page -= 1
                     else:
                         for photo, position in self.pages[self.current_page]:
                             if photo.get_rect(topleft=position).collidepoint(x, y):
                                 self.clicked_photo = pygame.transform.scale(photo, (self.screen_width, self.screen_height))
                                 break
-
 
     def draw(self):
         if self.visible:
@@ -65,12 +64,12 @@ class PhotoAlbum:
                         self.screen.blit(pygame.transform.scale(photo, (photo.get_width() + 10, photo.get_height() + 10)), position)
                     else:
                         self.screen.blit(photo, position)
-                #bouton suivant si ce n'est pas la dernière page
+                # Next button
                 if self.current_page < len(self.pages) - 1:
-                    self.screen.blit(self.next_button, (self.screen_width - 60, self.screen_height - 60))
-                #bouton précédent si ce n'est pas la première page
+                    self.screen.blit(self.next_button, (self.screen_width - self.next_button.get_width() - 30, self.screen_height - self.next_button.get_height() - 10))
+                # Previous button
                 if self.current_page > 0:
-                    self.screen.blit(self.prev_button, (10, self.screen_height - 60))
+                    self.screen.blit(self.prev_button, (50, self.screen_height - self.prev_button.get_height() - 10))            
                 #bouton de fermeture
                 self.screen.blit(self.close_button, (10, 10))
 
@@ -81,7 +80,7 @@ class PhotoAlbum:
 
 def main():
     pygame.init()
-    screen = pygame.display.set_mode((800, 600))
+    screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
     clock = pygame.time.Clock()
 
     album = PhotoAlbum(screen)
