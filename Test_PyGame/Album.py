@@ -1,21 +1,23 @@
 import pygame, sys
+import os
 class PhotoAlbum:
     def __init__(self, screen):
         self.screen = screen
         self.visible = False
         self.current_page = 0
         self.screen_width, self.screen_height = self.screen.get_size()
-        self.album_background = pygame.transform.scale(pygame.image.load('album_background.png'), (self.screen_width, self.screen_height))  # Chargement arrière-plan de l'album
-        self.next_button = pygame.transform.scale(pygame.image.load('next_button.png'), (200, 200))  # Loading next button
-        self.prev_button = pygame.transform.scale(pygame.image.load('prev_button.png'), (200, 200))  # Loading previous button
-        self.close_button = pygame.transform.scale(pygame.image.load('close_button.png'), (100, 100))  # Chargement bouton de fermeture        
-        self.pages = [[(pygame.transform.scale(pygame.image.load('photo1.png'), (self.screen_width//3, self.screen_height//3)), (self.screen_width//6 - 50, self.screen_height//4)),  # Chargement des photos
-        (pygame.transform.scale(pygame.image.load('photo2.png'), (self.screen_width//3, self.screen_height//3)), (self.screen_width//2 + 50, self.screen_height//2))],
-        [(pygame.transform.scale(pygame.image.load('photo3.png'), (self.screen_width//3, self.screen_height//3)), (self.screen_width//6 - 50, self.screen_height//4)),  
-        (pygame.transform.scale(pygame.image.load('photo4.png'), (self.screen_width//3, self.screen_height//3)), (self.screen_width//2 + 50, self.screen_height//2))]]
+        self.image_folder = "img_Album"
+        self.album_background = pygame.transform.scale(pygame.image.load(os.path.join(self.image_folder, 'album_background.png')), (self.screen_width, self.screen_height))
+        self.next_button = pygame.transform.scale(pygame.image.load(os.path.join(self.image_folder, 'next_button.png')), (200, 200))
+        self.prev_button = pygame.transform.scale(pygame.image.load(os.path.join(self.image_folder, 'prev_button.png')), (200, 200))
+        self.close_button = pygame.transform.scale(pygame.image.load(os.path.join(self.image_folder, 'close_button.png')), (100, 100))
+        self.pages = [[(pygame.transform.scale(pygame.image.load(os.path.join(self.image_folder, 'photo1.png')), (self.screen_width//3, self.screen_height//3)), (self.screen_width//6 - 50, self.screen_height//4)),
+        (pygame.transform.scale(pygame.image.load(os.path.join(self.image_folder, 'photo2.png')), (self.screen_width//3, self.screen_height//3)), (self.screen_width//2 + 50, self.screen_height//2))],
+        [(pygame.transform.scale(pygame.image.load(os.path.join(self.image_folder, 'photo3.png')), (self.screen_width//3, self.screen_height//3)), (self.screen_width//6 - 50, self.screen_height//4)),  
+        (pygame.transform.scale(pygame.image.load(os.path.join(self.image_folder, 'photo4.png')), (self.screen_width//3, self.screen_height//3)), (self.screen_width//2 + 50, self.screen_height//2))]]
         self.hovered_photo = None
         self.clicked_photo = None
-        self.back_button = pygame.transform.scale(pygame.image.load('prev_button.png'), (50, 50))  
+        self.back_button = pygame.transform.scale(pygame.image.load(os.path.join(self.image_folder, 'prev_button.png')), (50, 50))  
         self.transparent_background = pygame.Surface((self.screen_width, self.screen_height), pygame.SRCALPHA)
         self.transparent_background.fill((128, 128, 128, 128))
 

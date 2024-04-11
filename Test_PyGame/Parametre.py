@@ -71,8 +71,8 @@ settings = {
     'language': 'English'
 }
 
-volume_slider = Slider(0, 100, 330, 50, 200, 'Sound.png')
-music_slider = Slider(0, 100, 330, 100, 200, 'Music.png')
+volume_slider = Slider(0, 100, 330, 50, 200, 'img_Para\Sound.png')
+music_slider = Slider(0, 100, 330, 100, 200, 'img_Para\Music.png')
 language_dropdown = Dropdown(['English', 'Français'], 300, 300)
 cancel_button = Button('Cancel', 350, 250)
 apply_button = Button('Apply', 450, 300)
