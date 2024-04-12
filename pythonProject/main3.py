@@ -28,7 +28,7 @@ TILE_TYPES = 21
 MAX_LEVELS = 3
 screen_scroll = 0
 bg_scroll = 0
-level = 0
+level = 3
 start_game = False
 start_intro = False
 
@@ -56,21 +56,21 @@ start_img = pygame.image.load('img/start_btn.png').convert_alpha()
 exit_img = pygame.image.load('img/exit_btn.png').convert_alpha()
 restart_img = pygame.image.load('img/restart_btn.png').convert_alpha()
 #background
-bg1 = pygame.image.load('img/Background/Bg_1/bg1.png').convert_alpha()
+bg1 = pygame.image.load('img/Background/Bg_4/bg1.png').convert_alpha()
 bg1 = resize_image(bg1,2/3 * SCREEN_WIDTH, 4/5 * SCREEN_HEIGHT)
-bg2 = pygame.image.load('img/Background/Bg_1/bg2.png').convert_alpha()
+bg2 = pygame.image.load('img/Background/Bg_4/bg2.png').convert_alpha()
 bg2 = resize_image(bg2,2/3 * SCREEN_WIDTH, 4/5 * SCREEN_HEIGHT)
-bg3 = pygame.image.load('img/Background/Bg_1/bg3.png').convert_alpha()
+bg3 = pygame.image.load('img/Background/Bg_4/bg3.png').convert_alpha()
 bg3 = resize_image(bg3,2/3 * SCREEN_WIDTH, 4/5 * SCREEN_HEIGHT)
-bg4 = pygame.image.load('img/Background/Bg_1/bg4.png').convert_alpha()
+bg4 = pygame.image.load('img/Background/Bg_4/bg4.png').convert_alpha()
 bg4 = resize_image(bg4,2/3 * SCREEN_WIDTH, 4/5 * SCREEN_HEIGHT)
-bg5 = pygame.image.load('img/Background/Bg_1/bg5.png').convert_alpha()
+bg5 = pygame.image.load('img/Background/Bg_4/bg5.png').convert_alpha()
 bg5 = resize_image(bg5,2/3 * SCREEN_WIDTH, SCREEN_HEIGHT)
 
 #store tiles in a list
 img_list = []
 for x in range(TILE_TYPES):
-    img = pygame.image.load(f'img/Tile0/{x}.png')
+    img = pygame.image.load(f'img/Tile3/{x}.png')
     img = pygame.transform.scale(img, (TILE_SIZE, TILE_SIZE))
     img_list.append(img)
 
@@ -102,10 +102,10 @@ def draw_bg():
     width = bg5.get_width()
     for x in range(5):
         screen.blit(bg5, ((x * width) - bg_scroll * 0.35, 0))
-        screen.blit(bg4, ((x * width) - bg_scroll * 0.6, (2/3 * SCREEN_HEIGHT - (bg5.get_height() - 2*offset)) + offset))
-        screen.blit(bg3, ((x * width) - bg_scroll * 0.85, (2/3 * SCREEN_HEIGHT - bg4.get_height()) + offset))
-        screen.blit(bg2, ((x * width) - bg_scroll * 1.1, (2/3 * SCREEN_HEIGHT - bg3.get_height()) + offset))
-        screen.blit(bg1, ((x * width) - bg_scroll * 1.35, (2/3 * SCREEN_HEIGHT - bg2.get_height()) + offset))
+        screen.blit(bg4, ((x * width) - bg_scroll * 0.6, SCREEN_HEIGHT - (bg5.get_height())))
+        screen.blit(bg3, ((x * width) - bg_scroll * 0.85, SCREEN_HEIGHT - bg4.get_height()))
+        screen.blit(bg2, ((x * width) - bg_scroll * 1.1, SCREEN_HEIGHT - bg3.get_height()) )
+        screen.blit(bg1, ((x * width) - bg_scroll * 1.35, SCREEN_HEIGHT - bg2.get_height()))
 
 
 #function to reset level
@@ -146,7 +146,7 @@ class Soldier(pygame.sprite.Sprite):
         self.idling_counter = 0
 
         #load all images for the players
-        animation_types = ['Idle_left','Idle_right', 'Walk_left','Walk_right', 'Run_left','Run_right', 'Jump_left', 'Jump_right', 'Glide_left', 'Glide_right']
+        animation_types = ['Idle_left','Idle_right', 'Walk_left','Walk_right', 'Run_left','Run_right', 'Jump_left', 'Jump_right']
         for animation in animation_types:
             #reset temporary list of images
             temp_list = []
@@ -196,7 +196,6 @@ class Soldier(pygame.sprite.Sprite):
             self.jump = False
             self.in_air = True
 
-
         if gliding:
             self.vel_y += GRAVITY * dy
             self.rect.y += self.vel_y
@@ -205,7 +204,6 @@ class Soldier(pygame.sprite.Sprite):
             # self.velocity_y = -5  Pour s'envoler !!
 
             self.rect.x += self.direction * 300 * dy
-        
 
         #apply gravity
         self.vel_y += GRAVITY
@@ -580,7 +578,7 @@ while run:
         player.draw()
 
         world.draw_secretpath()
-
+        
         if inventory.inv_open:
             inventory.draw_inventory()
 

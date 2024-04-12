@@ -56,16 +56,16 @@ start_img = pygame.image.load('img/start_btn.png').convert_alpha()
 exit_img = pygame.image.load('img/exit_btn.png').convert_alpha()
 restart_img = pygame.image.load('img/restart_btn.png').convert_alpha()
 #background
-bg1 = pygame.image.load('img/Background/bg1.png').convert_alpha()
-bg1 = resize_image(bg1,SCREEN_WIDTH, SCREEN_HEIGHT)
-bg2 = pygame.image.load('img/Background/bg2.png').convert_alpha()
-bg2 = resize_image(bg2,SCREEN_WIDTH, SCREEN_HEIGHT)
-bg3 = pygame.image.load('img/Background/bg3.png').convert_alpha()
-bg3 = resize_image(bg3,SCREEN_WIDTH, SCREEN_HEIGHT)
-bg4 = pygame.image.load('img/Background/bg4.png').convert_alpha()
-bg4 = resize_image(bg4,SCREEN_WIDTH, SCREEN_HEIGHT)
-bg5 = pygame.image.load('img/Background/bg5.png').convert_alpha()
-bg5 = resize_image(bg5,SCREEN_WIDTH, SCREEN_HEIGHT)
+bg1 = pygame.image.load('img/Background/Bg_2/bg1.png').convert_alpha()
+bg1 = resize_image(bg1, 2/3 * SCREEN_WIDTH, 4/5 * SCREEN_HEIGHT)
+bg2 = pygame.image.load('img/Background/Bg_2/bg2.png').convert_alpha()
+bg2 = resize_image(bg2, 2/3 * SCREEN_WIDTH, 4/5 * SCREEN_HEIGHT)
+bg3 = pygame.image.load('img/Background/Bg_2/bg3.png').convert_alpha()
+bg3 = resize_image(bg3, 2/3 * SCREEN_WIDTH, 4/5 * SCREEN_HEIGHT)
+bg4 = pygame.image.load('img/Background/Bg_2/bg4.png').convert_alpha()
+bg4 = resize_image(bg4, 2/3 * SCREEN_WIDTH, 4/5 * SCREEN_HEIGHT)
+bg5 = pygame.image.load('img/Background/Bg_2/bg5.png').convert_alpha()
+bg5 = resize_image(bg5, 2/3 * SCREEN_WIDTH, SCREEN_HEIGHT)
 
 #store tiles in a list
 img_list = []
@@ -82,7 +82,8 @@ GREEN = (0, 255, 0)
 BLACK = (0, 0, 0)
 PINK = (235, 65, 54)
 
-
+button_activated = False
+gliding = False
 
 #define font
 font = pygame.font.SysFont('Futura', 30)
@@ -97,12 +98,13 @@ def draw_text(text, font, text_col, x, y):
 
 def draw_bg():
     screen.fill(BG)
+    offset = 70
     width = bg5.get_width()
     for x in range(5):
         screen.blit(bg5, ((x * width) - bg_scroll * 0.35, 0))
-        screen.blit(bg4, ((x * width) - bg_scroll * 0.6, SCREEN_HEIGHT - bg5.get_height()))
+        screen.blit(bg4, ((x * width) - bg_scroll * 0.6, SCREEN_HEIGHT - (bg5.get_height())))
         screen.blit(bg3, ((x * width) - bg_scroll * 0.85, SCREEN_HEIGHT - bg4.get_height()))
-        screen.blit(bg2, ((x * width) - bg_scroll * 1.1, SCREEN_HEIGHT - bg3.get_height()))
+        screen.blit(bg2, ((x * width) - bg_scroll * 1.1, SCREEN_HEIGHT - bg3.get_height()) )
         screen.blit(bg1, ((x * width) - bg_scroll * 1.35, SCREEN_HEIGHT - bg2.get_height()))
 
 
@@ -193,6 +195,15 @@ class Soldier(pygame.sprite.Sprite):
             self.vel_y = -15
             self.jump = False
             self.in_air = True
+
+        if gliding:
+            self.vel_y += GRAVITY * dy
+            self.rect.y += self.vel_y
+
+            self.vel_y *= 0.3
+            # self.velocity_y = -5  Pour s'envoler !!
+
+            self.rect.x += self.direction * 300 * dy
 
         #apply gravity
         self.vel_y += GRAVITY
@@ -326,6 +337,7 @@ class World():
                         decoration_group.add(decoration)
                     elif tile == 15:  #create player
                         player = Soldier('player', x * TILE_SIZE, y * TILE_SIZE, 1.65, 5)
+                        
 
         return player
 
@@ -336,7 +348,12 @@ class World():
 
     def draw_object(self):
         for item in collectible_items:
-            if not item.collected:  # Vérifie si l'objet n'a pas été ramassé
+            if not item.collected and not item.name == 'Secret_Path':  # Vérifie si l'objet n'a pas été ramassé
+                screen.blit(item.image, item.rect)
+
+    def draw_secretpath(self):
+        for item in collectible_items:
+            if not button_activated:
                 screen.blit(item.image, item.rect)
 
 
@@ -350,6 +367,16 @@ class Decoration(pygame.sprite.Sprite):
     def update(self):
         self.rect.x += screen_scroll
 
+
+class SecretPath(pygame.sprite.Sprite):
+    def __init__(self, img, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = img
+        self.rect = self.image.get_rect()
+        self.rect.midtop = (x + TILE_SIZE // 2, y + (TILE_SIZE - self.image.get_height()))
+
+    def update(self):
+        self.rect.x += screen_scroll
 
 class ScreenFade():
     def __init__(self, direction, colour, speed):
@@ -397,14 +424,19 @@ class CollectibleItem(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.name = name
         self.description = description
-        self.image = image  # Définit l'image de l'objet
-        self.rect = self.image.get_rect(
-            topleft=position)  # Utilise la position comme coin supérieur gauche du rectangle
+        self.image = image
+        self.rect = self.image.get_rect(topleft=position)
         self.collected = False
+        self.start_pos = position  # sauvegarde la position initiale
+
+    def update(self, scroll):
+        if not self.collected:
+            self.rect.x = self.start_pos[0] + scroll  # ajuste la position avec le défilement
 
     def collect(self):
         self.collected = True
         # Actions supplémentaires lors de la collecte, comme jouer un son ou afficher un message
+
 
 
 class Inventory:
@@ -488,7 +520,10 @@ collectible_items = []
 
 tile_collectible_mapping = {
     13: {'name': 'Cailloux', 'description': 'Ceci est un beau cailloux qui signe la fonctionnalité de inventaire', 'image': img_list[13]},
-    11: {'name': 'moins jolie Caillous', 'description': 'Ceci est un plus petit cailloux et pas tres beau', 'image': img_list[11]},
+    18: {'name': 'Button', 'description': 'Ceci est un plus petit cailloux et pas tres beau', 'image': img_list[18]},
+    14: {'name': 'moins jolie Caillous', 'description': 'Ceci est un plus petit cailloux et pas tres beau', 'image': img_list[14]},
+    12: {'name': 'Secret_Path', 'description': '', 'image': img_list[12]},
+
     # Ajoute d'autres entrées de mapping au besoin
 }
 
@@ -518,6 +553,11 @@ while run:
 
     clock.tick(FPS)
 
+    if start_game:
+        # Mise à jour de tous les objets ramassables
+        for item in collectible_items:
+            item.update(-bg_scroll)  # 
+
     if start_game == False:
         #draw menu
         screen.fill(BG)
@@ -536,6 +576,9 @@ while run:
 
         player.update()
         player.draw()
+
+        world.draw_secretpath()
+        
         if inventory.inv_open:
             inventory.draw_inventory()
 
@@ -551,9 +594,13 @@ while run:
 
         #update player actions
         if player.alive:
-            if player.in_air and player.direction > 0:
+            if gliding and player.direction > 0:
+                player.update_action(9)  #: glide_R
+            if gliding and player.direction < 0:
+                player.update_action(8)  #: glide_L
+            if player.in_air and not gliding and player.direction > 0:
                 player.update_action(7)  #: jump_R
-            elif player.in_air and player.direction < 0:
+            elif player.in_air and not gliding and player.direction < 0:
                 player.update_action(6)  #: jump_L
             elif moving_right and is_running:
                 player.update_action(5)  #: run_R
@@ -622,7 +669,15 @@ while run:
                 if event.key == pygame.K_ESCAPE:
                     run = False
                 if event.key == pygame.K_a:
-                    run_external_script('Album1.py')
+                    run_external_script('Album0.py')
+                if event.key == pygame.K_SPACE and player.in_air:
+                    print(gliding)
+                    if (moving_left or moving_right):
+                        gliding = True
+                    else:
+                        gliding = False
+                else :
+                    gliding = False
 
 
         pressed = pygame.key.get_pressed()
@@ -638,11 +693,14 @@ while run:
             if event.key == pygame.K_f:
                 # Vérifie la collision pour chaque objet ramassable
                 for item in collectible_items:
-                    if pygame.sprite.collide_rect(player, item) and not item.collected:
+                    if pygame.sprite.collide_rect(player, item) and not item.collected and not item.name == 'Button':
                         inventory.item_collected += 1
                         item.collect()  # Marque l'objet comme ramassé
                         inventory.add_item(item)  # Ajoute l'objet à l'inventaire du joueur
                         print(f"Objet {item.name} ramassé et ajouté à l'inventaire")
+                    if pygame.sprite.collide_rect(player, item) and item.name == 'Button':
+                        button_activated = True
+                        print(button_activated)
 
         #keyboard button released
         if event.type == pygame.KEYUP:

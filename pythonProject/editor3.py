@@ -9,15 +9,15 @@ pygame.init()
 clock = pygame.time.Clock()
 FPS = 60
 
-SCREEN_WIDTH = 600
-SCREEN_HEIGHT = 600
+SCREEN_WIDTH = 1920 - 300
+SCREEN_HEIGHT = 1080 - 100
 LOWER_MARGIN = 100
 SIDE_MARGIN = 300
 
 screen = pygame.display.set_mode((SCREEN_WIDTH + SIDE_MARGIN, SCREEN_HEIGHT + LOWER_MARGIN))
 pygame.display.set_caption('Level Editor')
 
-ROWS = 16
+ROWS = 30
 MAX_COLS = 150
 TILE_SIZE = SCREEN_HEIGHT // ROWS
 TILE_TYPES = 21
@@ -29,8 +29,7 @@ scroll = 0
 scroll_speed = 1
 
 pine1_img = pygame.image.load('img/fond.webp').convert_alpha()
-pine1_img = pygame.transform.scale(pine1_img, (600, 600))
-
+pine1_img = pygame.transform.scale(pine1_img, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
 
 img_list = []
