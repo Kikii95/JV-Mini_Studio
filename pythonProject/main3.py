@@ -552,7 +552,8 @@ run = True
 while run:
 
     clock.tick(FPS)
-
+    current_fps = clock.get_fps()
+    fps_text = f"FPS: {int(current_fps)}"
     if start_game:
         # Mise à jour de tous les objets ramassables
         for item in collectible_items:
@@ -669,7 +670,7 @@ while run:
                 if event.key == pygame.K_ESCAPE:
                     run = False
                 if event.key == pygame.K_a:
-                    run_external_script('Album0.py')
+                    run_external_script('Album3.py')
                 if event.key == pygame.K_SPACE and player.in_air:
                     print(gliding)
                     if (moving_left or moving_right):
@@ -710,6 +711,8 @@ while run:
                 moving_right = False
 
     draw_collectibles_counter(inventory.item_collected, total_collectibles)
+    draw_text(fps_text, font, BLACK, 150, 120)
+
 
     pygame.display.update()
 

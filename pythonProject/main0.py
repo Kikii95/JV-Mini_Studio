@@ -660,6 +660,10 @@ while run:
             run = False
         #keyboard presses
         if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_a:
+                run_external_script('Album0.py')
+            if event.key == pygame.K_p:
+                run_external_script('text0.py')
             if event.key == pygame.K_e:
                 inventory.inv_open = not inventory.inv_open
                 print(inventory.inv_open)
@@ -673,8 +677,6 @@ while run:
                     jump_fx.play()
                 if event.key == pygame.K_ESCAPE:
                     run = False
-                if event.key == pygame.K_a:
-                    run_external_script('Album0.py')
                 if event.key == pygame.K_SPACE and player.in_air:
                     print(gliding)
                     if (moving_left or moving_right):
