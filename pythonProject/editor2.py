@@ -1,218 +1,86 @@
 import pygame
-import button
-import csv
-import pickle
-from pygame.locals import *
+import sys
+import subprocess
 
+# Initialize Pygame
 pygame.init()
 
-clock = pygame.time.Clock()
-FPS = 60
+# Screen dimensions
+SCREEN_WIDTH = 1920
+SCREEN_HEIGHT = 1080
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
-SCREEN_WIDTH = 600
-SCREEN_HEIGHT = 600
-LOWER_MARGIN = 100
-SIDE_MARGIN = 300
+# Load images
+background_image = pygame.image.load('img/backgroundEndless_JV.png')
+character_image = pygame.image.load('img/Perso.png')
+shield_image = pygame.image.load('img/ecu.png')
+bubble_image = pygame.image.load('img/Bulle.png')
 
-screen = pygame.display.set_mode((SCREEN_WIDTH + SIDE_MARGIN, SCREEN_HEIGHT + LOWER_MARGIN))
-pygame.display.set_caption('Level Editor')
+# Scale images
+background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
+character_image = pygame.transform.scale(character_image, (320, 320))
+shield_image = pygame.transform.scale(shield_image, (320, 320))
+bubble_image = pygame.transform.scale(bubble_image, (1366, 726))
 
-ROWS = 16
-MAX_COLS = 150
-TILE_SIZE = SCREEN_HEIGHT // ROWS
-TILE_TYPES = 21
-level = 2
-current_tile = 0
-scroll_left = False
-scroll_right = False 
-scroll = 0
-scroll_speed = 1
+# The bubble image should not be scaled if its dimensions are already 1366x768.
+# If it needs to be scaled, uncomment the next line and set the desired dimensions.
+# bubble_image = pygame.transform.scale(bubble_image, (desired_width, desired_height))
 
-pine1_img = pygame.image.load('img/fond.webp').convert_alpha()
-pine1_img = pygame.transform.scale(pine1_img, (600, 600))
+# Position images
+character_rect = character_image.get_rect(midleft=(100, SCREEN_HEIGHT // 2))
+shield_rect = shield_image.get_rect(midright=(SCREEN_WIDTH - 100, SCREEN_HEIGHT // 2))
+bubble_rect = bubble_image.get_rect(midbottom=(SCREEN_WIDTH // 2, SCREEN_HEIGHT))
 
+# Dialogues
+dialogues = [
+    "Ugh… what a waste.",
+    "Being stuck here with my friend, unable to travel…",
+    "What a waste...",
+    "Huh? How eery is that?",
+    "Why would a lonely soul like you be wandering in the woods?",
+    "You seem to be lost little friend",
+    "I can help you… but you have to help me first.",
+    "We’re stuck here, my friend and I because we can’t find the lever and the coal"
+]
 
+current_dialogue = 0
 
-img_list = []
-for x in range(TILE_TYPES):
-	img = pygame.image.load(f'img/tile2/{x}.png')
-	img = pygame.transform.scale(img, (TILE_SIZE, TILE_SIZE))
-	img_list.append(img)
+# Font settings
+font_size = 36
+font = pygame.font.Font(None, font_size)
+text_color = (0, 0, 0)  # Black text
 
-	save_img = pygame.image.load('img/save_btn.png').convert_alpha()
-	load_img = pygame.image.load('img/load_btn.png').convert_alpha()
-	play_img = pygame.image.load('img/play_btn.png').convert_alpha()
+# Main loop
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if bubble_rect.collidepoint(event.pos):
+                current_dialogue += 1
+                if current_dialogue >= len(dialogues):
+                    subprocess.run(['python', 'main1.py'])
+                    running = False
 
+    # Drawing
+    screen.blit(background_image, (0, 0))
+    screen.blit(character_image, character_rect)
+    screen.blit(shield_image, shield_rect)
+    screen.blit(bubble_image, bubble_rect)
 
-GREEN = (0, 0, 0)
-WHITE = (255, 255, 255)
-RED = (200, 25, 25)
+    # Draw dialogue text if there is a dialogue to display
+    if current_dialogue < len(dialogues):
+        text_surface = font.render(dialogues[current_dialogue], True, text_color)
+        # Calculate the position of the text. Adjust these values as needed.
+        text_x = SCREEN_WIDTH // 2  # Horizontal center
+        text_y = 875  # Vertically center in the upper half of the bubble
+        text_rect = text_surface.get_rect(center=(text_x, text_y))
+        screen.blit(text_surface, text_rect)
 
-#define font
-font = pygame.font.SysFont('Futura', 30)
+    # Update the display
+    pygame.display.flip()
 
-
-world_data = []
-for row in range(ROWS):
-	r = [-1] * MAX_COLS
-	world_data.append(r)
-
-#create ground
-for tile in range(0, MAX_COLS):
-	world_data[ROWS - 1][tile] = 0
-
-
-#function for outputting text onto the screen
-def draw_text(text, font, text_col, x, y):
-	img = font.render(text, True, text_col)
-	screen.blit(img, (x, y))
-
-
-#create function for drawing background
-def draw_bg():
-	screen.fill(GREEN)
-	width = pine1_img.get_width()
-	for x in range(4):
-            screen.blit(pine1_img, (-scroll,0))
-
-
-#draw grid
-def draw_grid():
-	#vertical lines
-	for c in range(MAX_COLS + 1):
-		pygame.draw.line(screen, WHITE, (c * TILE_SIZE - scroll, 0), (c * TILE_SIZE - scroll, SCREEN_HEIGHT))
-	#horizontal lines
-	for c in range(ROWS + 1):
-		pygame.draw.line(screen, WHITE, (0, c * TILE_SIZE), (SCREEN_WIDTH, c * TILE_SIZE))
-
-
-#function for drawing the world tiles
-def draw_world():
-	for y, row in enumerate(world_data):
-		for x, tile in enumerate(row):
-			if tile >= 0:
-				screen.blit(img_list[tile], (x * TILE_SIZE - scroll, y * TILE_SIZE))
-
-
-
-#create buttons
-save_button = button.Button(SCREEN_WIDTH // 2, SCREEN_HEIGHT + LOWER_MARGIN - 50, save_img, 1)
-load_button = button.Button(SCREEN_WIDTH // 2 + 200, SCREEN_HEIGHT + LOWER_MARGIN - 50, load_img, 1)
-play_img = button.Button(SCREEN_WIDTH // 2, SCREEN_HEIGHT + LOWER_MARGIN - 50, play_img, 1)
-
-#make a button list
-button_list = []
-button_col = 0
-button_row = 0
-for i in range(len(img_list)):
-	tile_button = button.Button(SCREEN_WIDTH + (75 * button_col) + 50, 75 * button_row + 50, img_list[i], 1)
-	button_list.append(tile_button)
-	button_col += 1
-	if button_col == 3:
-		button_row += 1
-		button_col = 0
-
-
-run = True
-while run:
-
-	clock.tick(FPS)
-
-	draw_bg()
-	draw_grid()
-	draw_world()
-
-	draw_text(f'Level: {level}', font, WHITE, 10, SCREEN_HEIGHT + LOWER_MARGIN - 90)
-	draw_text('Press UP or DOWN to change level', font, WHITE, 10, SCREEN_HEIGHT + LOWER_MARGIN - 60)
-
-	#save and load data
-	if save_button.draw(screen):
-		#save level data
-		with open(f'level{level}_data.csv', 'w', newline='') as csvfile:
-			writer = csv.writer(csvfile, delimiter = ',')
-			for row in world_data:
-				writer.writerow(row)
-		#alternative pickle method
-		#pickle_out = open(f'level{level}_data', 'wb')
-		#pickle.dump(world_data, pickle_out)
-		#pickle_out.close()
-	if load_button.draw(screen):
-		#load in level data
-		#reset scroll back to the start of the level
-		scroll = 0
-		with open(f'level{level}_data.csv', newline='') as csvfile:
-			reader = csv.reader(csvfile, delimiter = ',')
-			for x, row in enumerate(reader):
-				for y, tile in enumerate(row):
-					world_data[x][y] = int(tile)
-		#alternative pickle method
-		#world_data = []
-		#pickle_in = open(f'level{level}_data', 'rb')
-		#world_data = pickle.load(pickle_in)
-				
-
-	#draw tile panel and tiles
-	pygame.draw.rect(screen, GREEN, (SCREEN_WIDTH, 0, SIDE_MARGIN, SCREEN_HEIGHT))
-
-	#choose a tile
-	button_count = 0
-	for button_count, i in enumerate(button_list):
-		if i.draw(screen):
-			current_tile = button_count
-
-	#highlight the selected tile
-	pygame.draw.rect(screen, RED, button_list[current_tile].rect, 3)
-
-	#scroll the map
-	if scroll_left == True and scroll > 0:
-		scroll -= 5 * scroll_speed
-	if scroll_right == True and scroll < (MAX_COLS * TILE_SIZE) - SCREEN_WIDTH:
-		scroll += 5 * scroll_speed
-
-	#add new tiles to the screen
-	#get mouse position
-	pos = pygame.mouse.get_pos()
-	x = (pos[0] + scroll) // TILE_SIZE
-	y = pos[1] // TILE_SIZE
-
-	#check that the coordinates are within the tile area
-	if pos[0] < SCREEN_WIDTH and pos[1] < SCREEN_HEIGHT:
-		#update tile value
-		if pygame.mouse.get_pressed()[0] == 1:
-			if world_data[y][x] != current_tile:
-				world_data[y][x] = current_tile
-		if pygame.mouse.get_pressed()[2] == 1:
-			world_data[y][x] = -1
-
-
-	for event in pygame.event.get():
-		if event.type == pygame.QUIT:
-			run = False
-		#keyboard presses
-		if event.type == pygame.KEYDOWN:
-			if event.key == pygame.K_UP:
-				level += 1
-			if event.key == pygame.K_DOWN and level > 0:
-				level -= 1
-			if event.key == pygame.K_LEFT:
-				scroll_left = True
-			if event.key == pygame.K_RIGHT:
-				scroll_right = True
-			if event.key == pygame.K_RSHIFT:
-				scroll_speed = 5
-
-
-		if event.type == pygame.KEYUP:
-			if event.key == pygame.K_LEFT:
-				scroll_left = False
-			if event.key == pygame.K_RIGHT:
-				scroll_right = False
-			if event.key == pygame.K_RSHIFT:
-				scroll_speed = 1
-
-		
-
-
-	pygame.display.update()
-
+# Clean up
 pygame.quit()
+sys.exit()

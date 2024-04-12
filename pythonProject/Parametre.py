@@ -1,5 +1,7 @@
 import pygame, sys
 
+
+
 class Slider:
     def __init__(self, min_val, max_val, x, y, width, image):
         self.min = min_val
@@ -80,7 +82,7 @@ cancel_button = Button('Cancel', 350, 250)
 apply_button = Button('Apply', 450, 300)
 FONT = pygame.font.Font(None, 24)
 WHITE = (255, 255, 255)
-GRAY = (128, 128, 128)
+GRAY = (144, 201, 120)
 
 def draw_text(text, x, y):
     img = FONT.render(text, True, WHITE)

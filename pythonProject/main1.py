@@ -18,6 +18,7 @@ pygame.display.set_caption('Game')
 clock = pygame.time.Clock()
 FPS = 60
 
+
 #define game variables
 GRAVITY = 0.75
 SCROLL_THRESH = 200
@@ -623,6 +624,8 @@ while run:
                     run = False
                 if event.key == pygame.K_a:
                     run_external_script('Album1.py')
+                if event.key == pygame.K_p:
+                    run_external_script('text1.py')
 
 
         pressed = pygame.key.get_pressed()
