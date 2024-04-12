@@ -38,10 +38,10 @@ while running:
         if event.type == pygame.MOUSEBUTTONDOWN:
             # Vérifier si le clic est sur le bouton transparent
             if button_surface.get_rect(topleft=transparent_button_position[:2]).collidepoint(event.pos):
-                run_external_script('main2.py')
+                run_external_script('main0.py')
             # Vérifier si le clic est sur le bouton 'roue'
             if pygame.Rect(wheel_button_position).collidepoint(event.pos):
-                run_external_script('carte.py')
+                run_external_script('Parametre.py')
 
     # Afficher l'image de fond
     screen.blit(background_image, (0, 0))

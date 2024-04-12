@@ -6,6 +6,10 @@ import subprocess
 # Initialise Pygame
 pygame.init()
 
+SCREEN_WIDTH = 1920
+SCREEN_HEIGHT = 1080
+
+
 # Charge l'image de fond
 background_image = pygame.image.load('img/CARTE.png')
 
