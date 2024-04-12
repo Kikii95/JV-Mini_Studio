@@ -348,8 +348,9 @@ class World():
 
     def draw_object(self):
         for item in collectible_items:
-            if not item.collected and not item.name == 'Secret_Path':  # Vérifie si l'objet n'a pas été ramassé
+            if not item.collected:  # Ne dessine l'objet que s'il n'a pas été collecté
                 screen.blit(item.image, item.rect)
+
 
     def draw_secretpath(self):
         for item in collectible_items:
@@ -695,12 +696,10 @@ while run:
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_f:
-                # Vérifie la collision pour chaque objet ramassable
                 for item in collectible_items:
-                    if pygame.sprite.collide_rect(player, item) and not item.collected and not item.name == 'Button':
-                        inventory.item_collected += 1
-                        item.collect()  # Marque l'objet comme ramassé
-                        inventory.add_item(item)  # Ajoute l'objet à l'inventaire du joueur
+                    if pygame.sprite.collide_rect(player, item) and not item.collected:
+                        item.collect()
+                        inventory.add_item(item)
                         print(f"Objet {item.name} ramassé et ajouté à l'inventaire")
                     if pygame.sprite.collide_rect(player, item) and item.name == 'Button':
                         button_activated = True

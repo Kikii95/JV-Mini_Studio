@@ -554,6 +554,7 @@ while run:
     clock.tick(FPS)
     current_fps = clock.get_fps()
     fps_text = f"FPS: {int(current_fps)}"
+    
     if start_game:
         # Mise à jour de tous les objets ramassables
         for item in collectible_items:
