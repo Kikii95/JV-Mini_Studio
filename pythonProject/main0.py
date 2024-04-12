@@ -326,6 +326,7 @@ class World():
                         decoration_group.add(decoration)
                     elif tile == 15:  #create player
                         player = Soldier('player', x * TILE_SIZE, y * TILE_SIZE, 1.65, 5)
+                        
 
         return player
 
@@ -397,14 +398,19 @@ class CollectibleItem(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.name = name
         self.description = description
-        self.image = image  # Définit l'image de l'objet
-        self.rect = self.image.get_rect(
-            topleft=position)  # Utilise la position comme coin supérieur gauche du rectangle
+        self.image = image
+        self.rect = self.image.get_rect(topleft=position)
         self.collected = False
+        self.start_pos = position  # sauvegarde la position initiale
+
+    def update(self, scroll):
+        if not self.collected:
+            self.rect.x = self.start_pos[0] + scroll  # ajuste la position avec le défilement
 
     def collect(self):
         self.collected = True
         # Actions supplémentaires lors de la collecte, comme jouer un son ou afficher un message
+
 
 
 class Inventory:
@@ -489,6 +495,8 @@ collectible_items = []
 tile_collectible_mapping = {
     13: {'name': 'Cailloux', 'description': 'Ceci est un beau cailloux qui signe la fonctionnalité de inventaire', 'image': img_list[13]},
     11: {'name': 'moins jolie Caillous', 'description': 'Ceci est un plus petit cailloux et pas tres beau', 'image': img_list[11]},
+    14: {'name': 'moins jolie Caillous', 'description': 'Ceci est un plus petit cailloux et pas tres beau', 'image': img_list[14]},
+
     # Ajoute d'autres entrées de mapping au besoin
 }
 
@@ -517,6 +525,11 @@ run = True
 while run:
 
     clock.tick(FPS)
+
+    if start_game:
+        # Mise à jour de tous les objets ramassables
+        for item in collectible_items:
+            item.update(-bg_scroll)  # 
 
     if start_game == False:
         #draw menu
