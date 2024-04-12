@@ -1,3 +1,5 @@
+import time
+
 import pygame
 from pygame import mixer
 import os
@@ -54,6 +56,7 @@ start_img = pygame.image.load('img/start_btn.png').convert_alpha()
 exit_img = pygame.image.load('img/exit_btn.png').convert_alpha()
 restart_img = pygame.image.load('img/restart_btn.png').convert_alpha()
 #background
+
 bg1 = pygame.image.load('img/Background/bg1.png').convert_alpha()
 bg1 = resize_image(bg1,SCREEN_WIDTH, SCREEN_HEIGHT)
 bg2 = pygame.image.load('img/Background/bg2.png').convert_alpha()
@@ -85,6 +88,41 @@ PINK = (235, 65, 54)
 #define font
 font = pygame.font.SysFont('Futura', 30)
 
+
+dialogues = [
+    "Bonjour aventurier!",
+    "Avez-vous vu les derniers événements au village?",
+    "Faites attention à vous dans la forêt, elle est dangereuse.",
+    "Revenez me voir si vous avez besoin de quelque chose."
+]
+
+
+is_chatting = False
+current_dialogue_index = 0
+message_interval = 3000
+button_activated = False
+gliding = False
+
+def draw_dialogues(dialogues, x, y, delay=1000):
+    current_dialogue_index = 0
+    last_update_time = pygame.time.get_ticks()
+
+
+    dialogue_rect = pygame.Rect(x, y, SCREEN_WIDTH - (SCREEN_WIDTH/3), 1000)
+    pygame.draw.rect(screen, (0, 0, 0), dialogue_rect)
+
+    if current_dialogue_index < len(dialogues):
+        text_chat = font.render(dialogues[current_dialogue_index], True, (255, 255, 255))
+        screen.blit(text_chat, (x, y))
+
+    time.sleep(3)
+    current_dialogue_index += 1
+
+    # Ensure the dialogue index is within bounds
+
+
+    pygame.display.flip()
+    clock.tick(60)  # Maintain 60 FPS
 
 
 
@@ -142,7 +180,7 @@ class Soldier(pygame.sprite.Sprite):
         self.idling_counter = 0
 
         #load all images for the players
-        animation_types = ['Idle_left','Idle_right', 'Walk_left','Walk_right', 'Run_left','Run_right', 'Jump_left', 'Jump_right']
+        animation_types = ['Idle_left','Idle_right', 'Walk_left','Walk_right', 'Run_left','Run_right', 'Jump_left', 'Jump_right', 'Glide_left', 'Glide_right']
         for animation in animation_types:
             #reset temporary list of images
             temp_list = []
@@ -191,6 +229,17 @@ class Soldier(pygame.sprite.Sprite):
             self.vel_y = -15
             self.jump = False
             self.in_air = True
+
+
+        if gliding:
+            self.vel_y += GRAVITY * dy
+            self.rect.y += self.vel_y
+
+            self.vel_y *= 0.3
+            # self.velocity_y = -5  Pour s'envoler !!
+
+            self.rect.x += self.direction * 300 * dy
+
 
         #apply gravity
         self.vel_y += GRAVITY
@@ -319,9 +368,6 @@ class World():
                     tile_data = (img, img_rect)
                     if tile >= 0 and tile <= 8:
                         self.obstacle_list.append(tile_data)
-                    elif tile >= 11 and tile <= 14:
-                        decoration = Decoration(img, x * TILE_SIZE, y * TILE_SIZE)
-                        decoration_group.add(decoration)
                     elif tile == 15:  #create player
                         player = Soldier('player', x * TILE_SIZE, y * TILE_SIZE, 1.65, 5)
 
@@ -334,11 +380,17 @@ class World():
 
     def draw_object(self):
         for item in collectible_items:
-            if not item.collected:  # Vérifie si l'objet n'a pas été ramassé
+            if not item.collected and not item.name == 'Secret_Path':  # Vérifie si l'objet n'a pas été ramassé
+                screen.blit(item.image, item.rect)
+
+    def draw_secretpath(self):
+        for item in collectible_items:
+            if not button_activated:
                 screen.blit(item.image, item.rect)
 
 
-class Decoration(pygame.sprite.Sprite):
+
+class SecretPath(pygame.sprite.Sprite):
     def __init__(self, img, x, y):
         pygame.sprite.Sprite.__init__(self)
         self.image = img
@@ -347,7 +399,6 @@ class Decoration(pygame.sprite.Sprite):
 
     def update(self):
         self.rect.x += screen_scroll
-
 
 class ScreenFade():
     def __init__(self, direction, colour, speed):
@@ -376,7 +427,6 @@ class ScreenFade():
 
 #create screen fades
 intro_fade = ScreenFade(1, BLACK, 4)
-death_fade = ScreenFade(2, PINK, 4)
 
 #create buttons
 start_button = button.Button(SCREEN_WIDTH // 2 - 130, SCREEN_HEIGHT // 2 - 150, start_img, 1)
@@ -386,6 +436,7 @@ restart_button = button.Button(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 - 50,
 #create sprite groups
 item_box_group = pygame.sprite.Group()
 decoration_group = pygame.sprite.Group()
+secretpath_group = pygame.sprite.Group()
 water_group = pygame.sprite.Group()
 exit_group = pygame.sprite.Group()
 
@@ -404,6 +455,14 @@ class CollectibleItem(pygame.sprite.Sprite):
         self.collected = True
         # Actions supplémentaires lors de la collecte, comme jouer un son ou afficher un message
 
+class Npc(pygame.sprite.Sprite):
+    def __init__(self, name, description, position, image):
+        pygame.sprite.Sprite.__init__(self)
+        self.name = name
+        self.description = description
+        self.image = image  # Définit l'image de l'objet
+        self.rect = self.image.get_rect(
+            topleft=position)  # Utilise la position comme coin supérieur gauche du rectangle
 
 class Inventory:
     def __init__(self):
@@ -485,8 +544,10 @@ for row in range(ROWS):
 collectible_items = []
 
 tile_collectible_mapping = {
-    13: {'name': 'Cailloux', 'description': 'Ceci est un beau cailloux qui signe la fonctionnalité de inventaire', 'image': img_list[13]},
+    13: {'name': 'Button', 'description': '', 'image': img_list[13]},
     11: {'name': 'moins jolie Caillous', 'description': 'Ceci est un plus petit cailloux et pas tres beau', 'image': img_list[11]},
+    16: {'name': 'Pnj', 'description': '', 'image': img_list[16]},
+    12: {'name': 'Secret_Path', 'description': '', 'image': img_list[0]},
     # Ajoute d'autres entrées de mapping au besoin
 }
 
@@ -531,15 +592,17 @@ while run:
         #draw world map
         world.draw()
         world.draw_object()
+        world.draw_secretpath()
 
         player.update()
         player.draw()
         if inventory.inv_open:
             inventory.draw_inventory()
+        #if is_chatting:
+            #draw_dialogues(dialogues, SCREEN_WIDTH / 5, SCREEN_HEIGHT - SCREEN_HEIGHT/10)
 
         #update and draw groups
-        decoration_group.update()
-        decoration_group.draw(screen)
+
 
         #show intro
         if start_intro == True:
@@ -549,9 +612,13 @@ while run:
 
         #update player actions
         if player.alive:
-            if player.in_air and player.direction > 0:
+            if gliding and player.direction > 0:
+                player.update_action(9)  #: glide_R
+            if gliding and player.direction < 0:
+                player.update_action(8)  #: glide_L
+            if player.in_air and not gliding and player.direction > 0:
                 player.update_action(7)  #: jump_R
-            elif player.in_air and player.direction < 0:
+            elif player.in_air and not gliding and player.direction < 0:
                 player.update_action(6)  #: jump_L
             elif moving_right and is_running:
                 player.update_action(5)  #: run_R
@@ -583,22 +650,6 @@ while run:
                                 world_data[x][y] = int(tile)
                     world = World()
                     player = world.process_data(world_data)
-        else:
-            screen_scroll = 0
-            if death_fade.fade():
-                if restart_button.draw(screen):
-                    death_fade.fade_counter = 0
-                    start_intro = True
-                    bg_scroll = 0
-                    world_data = reset_level()
-                    #load in level data and create world
-                    with open(f'level{level}_data.csv', newline='') as csvfile:
-                        reader = csv.reader(csvfile, delimiter=',')
-                        for x, row in enumerate(reader):
-                            for y, tile in enumerate(row):
-                                world_data[x][y] = int(tile)
-                    world = World()
-                    player = world.process_data(world_data)
 
     for event in pygame.event.get():
         #quit game
@@ -606,6 +657,8 @@ while run:
             run = False
         #keyboard presses
         if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                run = False
             if event.key == pygame.K_e:
                 inventory.inv_open = not inventory.inv_open
                 print(inventory.inv_open)
@@ -617,8 +670,18 @@ while run:
                 if event.key == pygame.K_SPACE and player.alive:
                     player.jump = True
                     jump_fx.play()
-                if event.key == pygame.K_ESCAPE:
-                    run = False
+                if event.key == pygame.K_ESCAPE and is_chatting:
+                    is_chatting = False
+                if event.key == pygame.K_SPACE and player.in_air:
+                    print(gliding)
+                    if (moving_left or moving_right):
+                        gliding = True
+                    else:
+                        gliding = False
+                else :
+                    gliding = False
+
+
 
 
         pressed = pygame.key.get_pressed()
@@ -634,11 +697,19 @@ while run:
             if event.key == pygame.K_f:
                 # Vérifie la collision pour chaque objet ramassable
                 for item in collectible_items:
-                    if pygame.sprite.collide_rect(player, item) and not item.collected:
+                    if pygame.sprite.collide_rect(player, item) and not item.collected and not item.name == 'Pnj' and not item.name =='Secret_Path' and not item.name =='Button':
                         inventory.item_collected += 1
                         item.collect()  # Marque l'objet comme ramassé
                         inventory.add_item(item)  # Ajoute l'objet à l'inventaire du joueur
                         print(f"Objet {item.name} ramassé et ajouté à l'inventaire")
+                    if pygame.sprite.collide_rect(player, item) and item.name == 'Pnj':
+                        is_chatting = True
+                        print(f"Interaction avec le Npc {item.name}")
+                    if pygame.sprite.collide_rect(player, item) and item.name == 'Button':
+                        button_activated = True
+
+
+
 
         #keyboard button released
         if event.type == pygame.KEYUP:
