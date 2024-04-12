@@ -554,6 +554,9 @@ run = True
 while run:
 
     clock.tick(FPS)
+    current_fps = clock.get_fps()
+    fps_text = f"FPS: {int(current_fps)}"
+
 
     if start_game:
         # Mise à jour de tous les objets ramassables
@@ -712,6 +715,8 @@ while run:
                 moving_right = False
 
     draw_collectibles_counter(inventory.item_collected, total_collectibles)
+    draw_text(fps_text, font, BLACK, 150, 120)
+
 
     pygame.display.update()
 

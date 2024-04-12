@@ -18,6 +18,7 @@ pygame.display.set_caption('Game')
 clock = pygame.time.Clock()
 FPS = 60
 
+
 #define game variables
 GRAVITY = 0.75
 SCROLL_THRESH = 200
